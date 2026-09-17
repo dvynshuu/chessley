@@ -1,7 +1,7 @@
 import { EngineScore, PieceColor } from '../../chess/types';
 export type { EngineScore };
 
-export type EngineMode = 'fast' | 'balanced' | 'deep' | 'custom';
+export type EngineMode = 'fast' | 'balanced' | 'deep' | 'max' | 'custom';
 
 export interface EngineConfig {
   mode: EngineMode;
@@ -9,6 +9,8 @@ export interface EngineConfig {
   timeLimitMs?: number;
   multiPv: number;
   hash: number;
+  threads?: number;
+  skillLevel?: number;
 }
 
 export const ENGINE_PRESETS: Record<EngineMode, EngineConfig> = {
@@ -18,6 +20,7 @@ export const ENGINE_PRESETS: Record<EngineMode, EngineConfig> = {
     timeLimitMs: 250,
     multiPv: 1,
     hash: 16,
+    skillLevel: 20,
   },
   balanced: {
     mode: 'balanced',
@@ -25,6 +28,7 @@ export const ENGINE_PRESETS: Record<EngineMode, EngineConfig> = {
     timeLimitMs: 600,
     multiPv: 1,
     hash: 32,
+    skillLevel: 20,
   },
   deep: {
     mode: 'deep',
@@ -32,6 +36,15 @@ export const ENGINE_PRESETS: Record<EngineMode, EngineConfig> = {
     timeLimitMs: 1500,
     multiPv: 1,
     hash: 64,
+    skillLevel: 20,
+  },
+  max: {
+    mode: 'max',
+    depth: 24,
+    timeLimitMs: 3000,
+    multiPv: 1,
+    hash: 128,
+    skillLevel: 20,
   },
   custom: {
     mode: 'custom',
@@ -39,6 +52,7 @@ export const ENGINE_PRESETS: Record<EngineMode, EngineConfig> = {
     timeLimitMs: 1000,
     multiPv: 1,
     hash: 32,
+    skillLevel: 20,
   },
 };
 

@@ -76,7 +76,7 @@ export class GameAnalyzer {
       nodes: (evalBefore.nodes || 0) + (evalAfter.nodes || 0),
       timeMs: (evalBefore.timeMs || 0) + (evalAfter.timeMs || 0),
       analyzedAt: Date.now(),
-      engineVersion: 'Stockfish 19',
+      engineVersion: 'Stockfish 19 Max',
     };
   }
 

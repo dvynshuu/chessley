@@ -42,12 +42,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
         style={{
           width: '100%',
           maxWidth: '520px',
-          backgroundColor: '#0f172a',
-          borderRadius: '12px',
+          backgroundColor: 'rgba(15, 23, 42, 0.88)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderRadius: '14px',
           border: '1px solid rgba(255, 255, 255, 0.12)',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
+          boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.85), 0 0 35px rgba(124, 58, 237, 0.2)',
           fontFamily: "'Inter', sans-serif",
           color: '#f8fafc',
           overflow: 'hidden',
@@ -96,21 +98,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
               <Palette size={16} color="#38bdf8" />
               Board Theme
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
-              {(['tournament', 'dark', 'glass', 'wood'] as BoardTheme[]).map((theme) => (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
+              {(['tournament', 'dark', 'glass', 'wood', 'midnight'] as BoardTheme[]).map((theme) => (
                 <button
                   key={theme}
                   onClick={() => setBoardTheme(theme)}
                   style={{
-                    padding: '8px',
-                    backgroundColor: boardTheme === theme ? '#2563eb' : '#1e293b',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    padding: '8px 4px',
+                    backgroundColor:
+                      boardTheme === theme
+                        ? theme === 'midnight'
+                          ? '#7c3aed'
+                          : '#2563eb'
+                        : 'rgba(30, 41, 59, 0.7)',
+                    border:
+                      boardTheme === theme
+                        ? '1px solid rgba(255, 255, 255, 0.3)'
+                        : '1px solid rgba(255, 255, 255, 0.06)',
                     borderRadius: '6px',
                     color: '#ffffff',
-                    fontSize: '12px',
-                    fontWeight: 600,
+                    fontSize: '11px',
+                    fontWeight: 700,
                     cursor: 'pointer',
                     textTransform: 'capitalize',
+                    boxShadow: boardTheme === theme ? '0 0 10px rgba(37, 99, 235, 0.5)' : 'none',
                   }}
                 >
                   {theme}
@@ -135,24 +146,33 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
               <Sliders size={16} color="#10b981" />
               Analysis Profile
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-              {(['fast', 'balanced', 'deep'] as EngineMode[]).map((mode) => (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+              {(['fast', 'balanced', 'deep', 'max'] as EngineMode[]).map((mode) => (
                 <button
                   key={mode}
                   onClick={() => setEngineMode(mode)}
                   style={{
                     padding: '8px',
-                    backgroundColor: engineMode === mode ? '#2563eb' : '#1e293b',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    backgroundColor:
+                      engineMode === mode
+                        ? mode === 'max'
+                          ? '#7c3aed'
+                          : '#2563eb'
+                        : '#1e293b',
+                    border:
+                      engineMode === mode && mode === 'max'
+                        ? '1px solid #a78bfa'
+                        : '1px solid rgba(255, 255, 255, 0.08)',
                     borderRadius: '6px',
                     color: '#ffffff',
                     fontSize: '12px',
                     fontWeight: 600,
                     cursor: 'pointer',
                     textTransform: 'capitalize',
+                    boxShadow: engineMode === mode && mode === 'max' ? '0 0 10px rgba(124, 58, 237, 0.5)' : 'none',
                   }}
                 >
-                  {mode}
+                  {mode === 'max' ? '★ Max' : mode}
                 </button>
               ))}
             </div>
@@ -160,16 +180,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
             {/* Depth Slider */}
             <div style={{ marginTop: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
-                <span style={{ color: '#94a3b8' }}>Target Depth</span>
-                <span style={{ fontWeight: 700, color: '#38bdf8' }}>{depth}</span>
+                <span style={{ color: '#94a3b8' }}>Target Depth (Up to Max Level 30)</span>
+                <span style={{ fontWeight: 700, color: depth >= 24 ? '#a78bfa' : '#38bdf8' }}>{depth}</span>
               </div>
               <input
                 type="range"
                 min={10}
-                max={22}
+                max={30}
                 value={depth}
                 onChange={(e) => setDepth(parseInt(e.target.value, 10))}
-                style={{ width: '100%', accentColor: '#2563eb' }}
+                style={{ width: '100%', accentColor: depth >= 24 ? '#7c3aed' : '#2563eb' }}
               />
             </div>
           </div>

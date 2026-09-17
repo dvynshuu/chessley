@@ -7,22 +7,29 @@
 }
 
 :root {
-  --bg-main: #090d16;
-  --bg-surface: #0f172a;
-  --bg-elevated: #1e293b;
+  --bg-main: #060911;
+  --bg-surface: rgba(15, 23, 42, 0.75);
+  --bg-elevated: rgba(30, 41, 59, 0.7);
   --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-focus: #2563eb;
+  --border-highlight: rgba(255, 255, 255, 0.16);
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   --accent-blue: #2563eb;
+  --accent-purple: #7c3aed;
   --accent-cyan: #38bdf8;
   --accent-emerald: #10b981;
+  --accent-gold: #c8aa6e;
   --accent-red: #ef4444;
 }
 
 body {
   background-color: var(--bg-main);
+  background-image: 
+    radial-gradient(circle at 90% 10%, rgba(124, 58, 237, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 10% 90%, rgba(14, 165, 233, 0.09) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.4) 0%, transparent 100%);
+  background-attachment: fixed;
   color: var(--text-primary);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -31,41 +38,68 @@ body {
   overflow-x: hidden;
 }
 
+/* Glassmorphism System */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.glass-card {
+  background: rgba(30, 41, 59, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.35);
+}
+
+.glow-max {
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.35), inset 0 0 15px rgba(124, 58, 237, 0.15);
+}
+
 button {
   font-family: inherit;
+  transition: transform 0.1s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+button:active {
+  transform: scale(0.97);
 }
 
 input, textarea {
   font-family: inherit;
 }
 
-/* Custom Scrollbar */
+/* Custom Satin Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(15, 23, 42, 0.4);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+  backdrop-filter: blur(4px);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.28);
 }
 
-/* Micro-animations */
+/* Keyframe Micro-animations */
 @keyframes badgePop {
   0% {
     transform: scale(0);
     opacity: 0;
   }
-  70% {
-    transform: scale(1.15);
+  65% {
+    transform: scale(1.18);
   }
   100% {
     transform: scale(1);
@@ -80,7 +114,27 @@ input, textarea {
   }
   50% {
     opacity: 0.4;
-    transform: scale(0.9);
+    transform: scale(0.85);
+  }
+}
+
+@keyframes checkPulse {
+  0%, 100% {
+    opacity: 0.85;
+    box-shadow: inset 0 0 18px rgba(239, 68, 68, 0.9), 0 0 15px rgba(239, 68, 68, 0.6);
+  }
+  50% {
+    opacity: 0.45;
+    box-shadow: inset 0 0 8px rgba(239, 68, 68, 0.5), 0 0 6px rgba(239, 68, 68, 0.2);
+  }
+}
+
+@keyframes lastMovePulse {
+  0%, 100% {
+    opacity: 0.95;
+  }
+  50% {
+    opacity: 0.78;
   }
 }
 
@@ -97,14 +151,16 @@ input, textarea {
   animation: spin 1s linear infinite;
 }
 
+/* Chessboard Vector Piece Polish */
 .chessboard-piece {
-  width: 90%;
-  height: 90%;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
-  transition: transform 0.1s ease;
+  width: 88%;
+  height: 88%;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
   pointer-events: none;
 }
 
 .chessboard-piece:hover {
-  transform: scale(1.04);
+  transform: scale(1.05);
 }
+

@@ -42,11 +42,14 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '12px',
-        backgroundColor: '#0f172a',
-        borderRadius: '8px',
+        gap: '14px',
+        backgroundColor: 'rgba(15, 23, 42, 0.72)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderRadius: '10px',
         border: '1px solid rgba(255, 255, 255, 0.08)',
-        padding: '14px',
+        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4)',
+        padding: '16px',
         fontFamily: "'Inter', sans-serif",
       }}
     >
@@ -59,10 +62,25 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Cpu size={16} color="#38bdf8" />
+          <Cpu size={16} color={engineMode === 'max' ? '#a78bfa' : '#38bdf8'} />
           <span style={{ fontSize: '13px', fontWeight: 700, color: '#f8fafc', letterSpacing: '-0.2px' }}>
-            Stockfish 19 WASM
+            Stockfish 19 {engineMode === 'max' ? 'Max Level' : 'WASM'}
           </span>
+          {engineMode === 'max' && (
+            <span
+              style={{
+                fontSize: '10px',
+                fontWeight: 800,
+                padding: '1px 5px',
+                borderRadius: '4px',
+                backgroundColor: 'rgba(124, 58, 237, 0.25)',
+                color: '#c4b5fd',
+                border: '1px solid rgba(167, 139, 250, 0.4)',
+              }}
+            >
+              LVL 20
+            </span>
+          )}
           {isEvaluating && (
             <span
               style={{
@@ -89,7 +107,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
 
         {/* Preset Selector */}
         <div style={{ display: 'flex', gap: '4px', backgroundColor: '#1e293b', padding: '2px', borderRadius: '6px' }}>
-          {(['fast', 'balanced', 'deep'] as EngineMode[]).map((mode) => (
+          {(['fast', 'balanced', 'deep', 'max'] as EngineMode[]).map((mode) => (
             <button
               key={mode}
               onClick={() => onSetEngineMode(mode)}
@@ -99,14 +117,20 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
                 fontWeight: 600,
                 border: 'none',
                 borderRadius: '4px',
-                backgroundColor: engineMode === mode ? '#2563eb' : 'transparent',
+                backgroundColor:
+                  engineMode === mode
+                    ? mode === 'max'
+                      ? '#7c3aed'
+                      : '#2563eb'
+                    : 'transparent',
                 color: engineMode === mode ? '#ffffff' : '#94a3b8',
                 cursor: 'pointer',
                 textTransform: 'capitalize',
                 transition: 'background-color 0.1s',
+                boxShadow: engineMode === mode && mode === 'max' ? '0 0 8px rgba(124, 58, 237, 0.4)' : 'none',
               }}
             >
-              {mode}
+              {mode === 'max' ? '★ Max' : mode}
             </button>
           ))}
         </div>
@@ -117,23 +141,25 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '8px',
+          gap: '10px',
         }}
       >
         <div
           style={{
-            backgroundColor: '#1e293b',
-            borderRadius: '6px',
-            padding: '8px 10px',
-            border: '1px solid rgba(255, 255, 255, 0.04)',
+            backgroundColor: 'rgba(30, 41, 59, 0.65)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '8px',
+            padding: '10px 12px',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
           }}
         >
-          <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 600, marginBottom: '2px' }}>
+          <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginBottom: '4px' }}>
             Evaluation
           </div>
           <div
             style={{
-              fontSize: '16px',
+              fontSize: '17px',
               fontWeight: 800,
               fontFamily: "'JetBrains Mono', monospace",
               color: score.type === 'mate' ? '#38bdf8' : score.value >= 0 ? '#f8fafc' : '#94a3b8',
@@ -145,21 +171,23 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
 
         <div
           style={{
-            backgroundColor: '#1e293b',
-            borderRadius: '6px',
-            padding: '8px 10px',
-            border: '1px solid rgba(255, 255, 255, 0.04)',
+            backgroundColor: 'rgba(30, 41, 59, 0.65)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '8px',
+            padding: '10px 12px',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
           }}
         >
-          <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 600, marginBottom: '2px' }}>
+          <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginBottom: '4px' }}>
             Depth
           </div>
           <div
             style={{
-              fontSize: '16px',
+              fontSize: '17px',
               fontWeight: 800,
               fontFamily: "'JetBrains Mono', monospace",
-              color: '#38bdf8',
+              color: depth >= 24 ? '#c4b5fd' : '#38bdf8',
             }}
           >
             {depth > 0 ? depth : '—'}
@@ -168,13 +196,15 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
 
         <div
           style={{
-            backgroundColor: '#1e293b',
-            borderRadius: '6px',
-            padding: '8px 10px',
-            border: '1px solid rgba(255, 255, 255, 0.04)',
+            backgroundColor: 'rgba(30, 41, 59, 0.65)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '8px',
+            padding: '10px 12px',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
           }}
         >
-          <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 600, marginBottom: '2px' }}>
+          <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginBottom: '4px' }}>
             Nodes / NPS
           </div>
           <div
@@ -182,7 +212,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
               fontSize: '13px',
               fontWeight: 700,
               fontFamily: "'JetBrains Mono', monospace",
-              color: '#94a3b8',
+              color: '#e2e8f0',
               marginTop: '3px',
             }}
           >
@@ -198,13 +228,14 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            backgroundColor: CLASSIFICATION_META[currentMoveAnalysis.classification]?.bgColor || '#1e293b',
+            backgroundColor: CLASSIFICATION_META[currentMoveAnalysis.classification]?.bgColor || 'rgba(30, 41, 59, 0.7)',
             border: `1px solid ${CLASSIFICATION_META[currentMoveAnalysis.classification]?.color || 'transparent'}`,
-            borderRadius: '6px',
-            padding: '8px 12px',
+            borderRadius: '8px',
+            padding: '10px 14px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.35)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Award size={18} color={CLASSIFICATION_META[currentMoveAnalysis.classification]?.color} />
             <div>
               <span
@@ -216,7 +247,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
               >
                 {CLASSIFICATION_META[currentMoveAnalysis.classification]?.name} ({currentMoveAnalysis.san})
               </span>
-              <div style={{ fontSize: '11px', color: '#94a3b8' }}>
+              <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
                 Accuracy: {currentMoveAnalysis.moveAccuracy}% | Loss: -{currentMoveAnalysis.winProbabilityLoss}%
               </div>
             </div>
@@ -224,7 +255,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
 
           <div
             style={{
-              fontSize: '14px',
+              fontSize: '15px',
               fontWeight: 800,
               color: CLASSIFICATION_META[currentMoveAnalysis.classification]?.color,
             }}
@@ -237,10 +268,11 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
       {/* Best Move & Principal Variation (PV) */}
       <div
         style={{
-          backgroundColor: '#1e293b',
-          borderRadius: '6px',
-          padding: '10px',
-          border: '1px solid rgba(255, 255, 255, 0.04)',
+          backgroundColor: 'rgba(30, 41, 59, 0.65)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '8px',
+          padding: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
         }}
       >
         <div
@@ -248,7 +280,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: '6px',
+            marginBottom: '8px',
           }}
         >
           <span style={{ fontSize: '12px', fontWeight: 700, color: '#94a3b8' }}>
@@ -260,6 +292,10 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
                 fontSize: '12px',
                 fontWeight: 800,
                 color: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
                 fontFamily: "'JetBrains Mono', monospace",
               }}
             >
@@ -273,7 +309,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
             fontSize: '12px',
             fontFamily: "'JetBrains Mono', monospace",
             color: '#cbd5e1',
-            lineHeight: 1.5,
+            lineHeight: 1.6,
             wordBreak: 'break-word',
           }}
         >
@@ -284,11 +320,13 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
                 style={{
                   display: 'inline-block',
                   marginRight: '6px',
-                  padding: '1px 4px',
-                  borderRadius: '3px',
-                  backgroundColor: idx === 0 ? 'rgba(16, 185, 129, 0.15)' : 'transparent',
-                  color: idx === 0 ? '#10b981' : '#cbd5e1',
-                  fontWeight: idx === 0 ? 700 : 500,
+                  marginBottom: '4px',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  backgroundColor: idx === 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                  border: idx === 0 ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(255, 255, 255, 0.06)',
+                  color: idx === 0 ? '#34d399' : '#e2e8f0',
+                  fontWeight: idx === 0 ? 800 : 500,
                 }}
               >
                 {moveUci}

@@ -1,32 +1,37 @@
-# Chessley ♟️⚡
+# Chessley ♟️⚡ (v2.0 Max Level Edition)
 
-> **Precision Chess.com Stockfish 19 Game Analyzer from Scratch**
+> **Precision Chess.com Stockfish 19 Game Analyzer — Multi-Core Parallel Architecture**
 
-Chessley is a high-accuracy, lightning-fast chess game analyzer powered by real **Stockfish 19 WebAssembly**, dedicated Web Worker architecture, mathematical win-probability accuracy modeling, and a high-performance workstation interface.
+Chessley is a high-accuracy, lightning-fast chess game analyzer powered by real **Stockfish 19 WebAssembly**, multi-core Web Worker parallel architecture, mathematical win-probability accuracy modeling, and a high-performance workstation interface.
 
 ---
 
 ## Features
 
-- **Real Stockfish 19 WebAssembly Engine**:
-  - Employs Chess.com's official `stockfish@19.0.0` distribution (`stockfish-19-lite-single.wasm` and `stockfish-19-lite-single.js`, ~1.6MB).
-  - Web Worker isolation with zero main-thread blocking.
+- **v2.0 Max Level (Grandmaster) Engine & Multi-Worker Architecture**:
+  - **Max Level Mode**: Depth 24+, 128MB Hash table, Skill Level 20, with target depth configurable up to 30.
+  - **Parallel Multi-Worker Pool**: Dynamically provisions concurrent background Web Workers (`navigator.hardwareConcurrency` aware) delivering 2x–4x faster whole-game analysis.
+  - **Dedicated Interactive Worker**: Fully decoupled interactive worker ensures instantaneous, zero-latency live board scrubbing even while whole-game background analysis is underway.
+  - **FEN Position Deduplication**: Automatically eliminates redundant evaluations across repeated board states.
   - Strongly typed UCI parser with request ID race-condition guards and cancellation support.
 - **Multi-Pass Adaptive Priority Scheduler**:
   - **Priority 100**: Instant live analysis for the current visible board position.
-  - **Pass 1**: Rapid whole-game scan across all plies.
-  - **Pass 2**: Deep refinement targeting blunders, mistakes, and tactical swings.
+  - **Pass 1**: Rapid parallel scan across all unique plies.
+  - **Pass 2**: Deep refinement targeting blunders, mistakes, and tactical swings at depth 24.
 - **Mathematical Accuracy & Classification Model**:
   - Standard Lichess/Chess.com sigmoid win probability model:
     $$WP(cp) = \frac{100}{1 + e^{-0.00368208 \times cp}}$$
     $$Accuracy = 103.1668 \times e^{-0.04354 \times Loss} - 3.1668$$
   - Move classification: Brilliant (`!!`), Great (`!`), Best (`★`), Excellent (`✓`), Good (`✓`), Inaccuracy (`?!`), Mistake (`?`), Blunder (`??`), Missed Win (`✕`).
-- **Workstation Interface**:
-  - Interactive vector chessboard with 4 board themes (Tournament, Dark Obsidian, Glass Ice, Classic Wood).
-  - Dynamic SVG arrows: glowing emerald arrows for best moves, crimson arrows for blunders.
-  - In-place floating classification badges on destination squares.
-  - Precision vertical evaluation bar with animated non-linear transitions.
-  - High-DPI HTML5 Canvas evaluation graph with hover scrubbing and blunder markers.
+- **Workstation Interface & Luxury Visual Design**:
+  - Atmospheric celestial radial mesh background (`#060911` with purple/cyan ambient auras).
+  - Premium frosted glassmorphism cards (`backdrop-filter: blur(16px)`), subtle neon halos, and satin scrollbars.
+  - Interactive vector chessboard with 5 board themes: **Midnight Luxury** (Flagship Obsidian & Gold), Tournament Emerald, Dark Slate, Glass Ice, and Classic Wood.
+  - Double-beveled luxury board frame with violet ambient drop shadow, pulsating last-move gold overlay, selected square neon ring, and animated crimson check alerts.
+  - Dynamic SVG arrows with `feDropShadow` glowing filters: vibrant emerald for best moves, crimson/amber for blunders.
+  - In-place floating classification badges on destination squares with pop micro-animations.
+  - Precision vertical evaluation bar with glass container, advantage tick marks (±5, ±2, 0.00), and floating score pill.
+  - High-DPI Bezier spline evaluation flow with Catmull-Rom curvature interpolation, cyan/amethyst gradient fills, and interactive glass hover tooltip.
   - Real-time engine statistics: depth, nodes, NPS, hash, and interactive clickable Principal Variation lines.
   - Procedural Web Audio API sound synthesizer: zero-latency wooden clicks, captures, check bells, and blunder alerts.
 - **Chess.com Integration & Export**:
@@ -44,7 +49,7 @@ Chessley is a high-accuracy, lightning-fast chess game analyzer powered by real 
 - **Chess Logic**: `chess.js` (move generation, legal validation, FEN, PGN)
 - **Engine**: Stockfish 19 WebAssembly
 - **Caching**: Multi-tier in-memory LRU + IndexedDB (`idb-keyval`)
-- **Testing**: Vitest (25 unit tests covering UCI, math, classifications, and tactical positions)
+- **Testing**: Vitest (29 unit tests covering UCI, math, classifications, multi-worker engine pool, and tactical positions)
 - **Icons**: Lucide React
 
 ---

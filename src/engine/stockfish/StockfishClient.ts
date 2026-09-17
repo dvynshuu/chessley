@@ -29,6 +29,7 @@ export class StockfishClient {
         this.worker = new Worker(this.workerUrl);
 
         const timeout = setTimeout(() => {
+          this.destroy();
           reject(new Error('Stockfish worker initialization timed out (10s)'));
         }, 10000);
 
@@ -39,24 +40,31 @@ export class StockfishClient {
 
         this.worker.onerror = (err) => {
           console.error('[Stockfish Worker Error]:', err);
+          this.isReady = false;
+          this.isSearching = false;
+          try {
+            this.worker?.terminate();
+          } catch {}
+          this.worker = null;
           reject(err);
         };
 
-        // Initialize UCI
+        // Initialize UCI handshake
         this.sendCommand('uci');
         this.waitForLine('uciok', 10000)
           .then(() => {
             this.sendCommand('isready');
             return this.waitForLine('readyok', 10000);
           })
-          .then(() => {
+          .then(async () => {
             this.isReady = true;
             clearTimeout(timeout);
-            this.applyConfig(this.activeConfig);
+            await this.applyConfig(this.activeConfig);
             resolve();
           })
           .catch((err) => {
             clearTimeout(timeout);
+            this.destroy();
             reject(err);
           });
       } catch (err) {
@@ -67,10 +75,26 @@ export class StockfishClient {
 
   public async applyConfig(config: EngineConfig): Promise<void> {
     this.activeConfig = config;
-    if (!this.isReady) return;
+    if (!this.isReady || !this.worker) return;
 
+    if (this.isSearching) {
+      await this.stop();
+    }
+
+    this.sendCommand(`setoption name Skill Level value ${config.skillLevel ?? 20}`);
+    this.sendCommand('setoption name Move Overhead value 10');
     this.sendCommand(`setoption name Hash value ${config.hash}`);
     this.sendCommand(`setoption name MultiPV value ${config.multiPv}`);
+    this.sendCommand('isready');
+    await this.waitForLine('readyok', 5000);
+  }
+
+  public async newGame(): Promise<void> {
+    if (!this.isReady || !this.worker) return;
+    if (this.isSearching) {
+      await this.stop();
+    }
+    this.sendCommand('ucinewgame');
     this.sendCommand('isready');
     await this.waitForLine('readyok', 5000);
   }
@@ -136,9 +160,13 @@ export class StockfishClient {
       throw new DOMException('Aborted', 'AbortError');
     }
 
-    // Stop previous search if any
+    // Stop previous search if any and wait until engine is quiescent
     if (this.isSearching) {
-      this.stop();
+      await this.stop();
+    }
+
+    if (options.signal?.aborted) {
+      throw new DOMException('Aborted', 'AbortError');
     }
 
     const requestId = ++this.currentRequestId;
@@ -170,7 +198,7 @@ export class StockfishClient {
 
       const onAbort = () => {
         cleanup();
-        this.stop();
+        this.stop().catch(() => {});
         reject(new DOMException('Aborted', 'AbortError'));
       };
 
@@ -237,15 +265,38 @@ export class StockfishClient {
     });
   }
 
-  public stop(): void {
+  public async stop(): Promise<void> {
+    if (!this.isSearching || !this.worker) return;
+
+    return new Promise<void>((resolve) => {
+      let resolved = false;
+      const done = () => {
+        if (resolved) return;
+        resolved = true;
+        clearTimeout(timer);
+        this.removeLineListener(listener);
+        this.isSearching = false;
+        resolve();
+      };
+
+      const timer = setTimeout(done, 400);
+
+      const listener = (line: string) => {
+        if (line.startsWith('bestmove ') || line.includes('readyok')) {
+          done();
+        }
+      };
+
+      this.onLineCallbacks.push(listener);
+      this.sendCommand('stop');
+    });
+  }
+
+  public destroy(): void {
     if (this.isSearching) {
       this.sendCommand('stop');
       this.isSearching = false;
     }
-  }
-
-  public destroy(): void {
-    this.stop();
     this.sendCommand('quit');
     if (this.worker) {
       this.worker.terminate();

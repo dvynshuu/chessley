@@ -48,10 +48,13 @@ export const MoveList: React.FC<MoveListProps> = ({
         height: '100%',
         maxHeight: '340px',
         overflowY: 'auto',
-        backgroundColor: '#0f172a',
-        borderRadius: '8px',
+        backgroundColor: 'rgba(15, 23, 42, 0.72)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderRadius: '10px',
         border: '1px solid rgba(255, 255, 255, 0.08)',
-        padding: '6px',
+        padding: '8px',
+        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4)',
         fontFamily: "'JetBrains Mono', monospace",
         fontSize: '13px',
       }}
@@ -68,11 +71,12 @@ export const MoveList: React.FC<MoveListProps> = ({
             key={`move_row_${pair.moveNumber}`}
             style={{
               display: 'grid',
-              gridTemplateColumns: '38px 1fr 1fr',
+              gridTemplateColumns: '40px 1fr 1fr',
               alignItems: 'center',
-              padding: '3px 4px',
-              borderRadius: '4px',
+              padding: '2px 4px',
+              borderRadius: '6px',
               backgroundColor: pair.moveNumber % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'transparent',
+              marginBottom: '2px',
             }}
           >
             {/* Move Number */}
@@ -89,13 +93,19 @@ export const MoveList: React.FC<MoveListProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '4px 6px',
-                  borderRadius: '4px',
-                  backgroundColor: isWhiteActive ? '#2563eb' : 'transparent',
+                  padding: '5px 8px',
+                  borderRadius: '6px',
+                  background: isWhiteActive
+                    ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.95), rgba(59, 130, 246, 0.85))'
+                    : 'transparent',
                   color: isWhiteActive ? '#ffffff' : '#f1f5f9',
                   cursor: 'pointer',
-                  fontWeight: isWhiteActive ? 700 : 500,
-                  transition: 'background-color 0.1s',
+                  fontWeight: isWhiteActive ? 800 : 500,
+                  boxShadow: isWhiteActive
+                    ? '0 2px 10px rgba(37, 99, 235, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.25)'
+                    : 'none',
+                  borderLeft: isWhiteActive ? '3px solid #38bdf8' : '3px solid transparent',
+                  transition: 'all 0.12s ease',
                 }}
               >
                 <span>{pair.white.san}</span>
@@ -108,13 +118,17 @@ export const MoveList: React.FC<MoveListProps> = ({
                       fontSize: '11px',
                     }}
                   >
-                    <span style={{ opacity: 0.75 }}>
+                    <span style={{ opacity: isWhiteActive ? 0.9 : 0.6, fontSize: '10px' }}>
                       {formatScore(whiteAnalysis.playedScoreAfter)}
                     </span>
                     <span
                       style={{
+                        padding: '1px 4px',
+                        borderRadius: '3px',
+                        backgroundColor: CLASSIFICATION_META[whiteAnalysis.classification]?.bgColor || 'transparent',
                         color: CLASSIFICATION_META[whiteAnalysis.classification]?.color || '#cbd5e1',
                         fontWeight: 800,
+                        fontSize: '11px',
                       }}
                     >
                       {CLASSIFICATION_META[whiteAnalysis.classification]?.symbol}
@@ -135,13 +149,20 @@ export const MoveList: React.FC<MoveListProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '4px 6px',
-                  borderRadius: '4px',
-                  backgroundColor: isBlackActive ? '#2563eb' : 'transparent',
+                  padding: '5px 8px',
+                  borderRadius: '6px',
+                  background: isBlackActive
+                    ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.95), rgba(59, 130, 246, 0.85))'
+                    : 'transparent',
                   color: isBlackActive ? '#ffffff' : '#f1f5f9',
                   cursor: 'pointer',
-                  fontWeight: isBlackActive ? 700 : 500,
-                  transition: 'background-color 0.1s',
+                  fontWeight: isBlackActive ? 800 : 500,
+                  boxShadow: isBlackActive
+                    ? '0 2px 10px rgba(37, 99, 235, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.25)'
+                    : 'none',
+                  borderLeft: isBlackActive ? '3px solid #38bdf8' : '3px solid transparent',
+                  transition: 'all 0.12s ease',
+                  marginLeft: '4px',
                 }}
               >
                 <span>{pair.black.san}</span>
@@ -154,13 +175,17 @@ export const MoveList: React.FC<MoveListProps> = ({
                       fontSize: '11px',
                     }}
                   >
-                    <span style={{ opacity: 0.75 }}>
+                    <span style={{ opacity: isBlackActive ? 0.9 : 0.6, fontSize: '10px' }}>
                       {formatScore(blackAnalysis.playedScoreAfter)}
                     </span>
                     <span
                       style={{
+                        padding: '1px 4px',
+                        borderRadius: '3px',
+                        backgroundColor: CLASSIFICATION_META[blackAnalysis.classification]?.bgColor || 'transparent',
                         color: CLASSIFICATION_META[blackAnalysis.classification]?.color || '#cbd5e1',
                         fontWeight: 800,
+                        fontSize: '11px',
                       }}
                     >
                       {CLASSIFICATION_META[blackAnalysis.classification]?.symbol}

@@ -74,12 +74,15 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: '#0f172a',
-        borderRadius: '8px',
+        backgroundColor: 'rgba(15, 23, 42, 0.7)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderRadius: '10px',
         border: '1px solid rgba(255, 255, 255, 0.08)',
-        padding: '6px 12px',
+        padding: '8px 14px',
         width: '100%',
         maxWidth: '640px',
+        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.35)',
       }}
     >
       <div style={{ display: 'flex', gap: '6px' }}>
@@ -88,9 +91,9 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
           disabled={currentPly === 0}
           title="First Move (Home)"
           style={{
-            padding: '8px',
-            backgroundColor: '#1e293b',
-            border: 'none',
+            padding: '8px 10px',
+            backgroundColor: 'rgba(30, 41, 59, 0.8)',
+            border: '1px solid rgba(255, 255, 255, 0.06)',
             borderRadius: '6px',
             color: currentPly === 0 ? '#475569' : '#f8fafc',
             cursor: currentPly === 0 ? 'default' : 'pointer',
@@ -104,9 +107,9 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
           disabled={currentPly === 0}
           title="Previous Move (←)"
           style={{
-            padding: '8px',
-            backgroundColor: '#1e293b',
-            border: 'none',
+            padding: '8px 10px',
+            backgroundColor: 'rgba(30, 41, 59, 0.8)',
+            border: '1px solid rgba(255, 255, 255, 0.06)',
             borderRadius: '6px',
             color: currentPly === 0 ? '#475569' : '#f8fafc',
             cursor: currentPly === 0 ? 'default' : 'pointer',
@@ -119,15 +122,20 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
           onClick={() => setIsPlaying((p) => !p)}
           title="Play / Pause (Space)"
           style={{
-            padding: '8px 12px',
-            backgroundColor: isPlaying ? '#f59e0b' : '#2563eb',
+            padding: '8px 14px',
+            background: isPlaying
+              ? 'linear-gradient(135deg, #f59e0b, #d97706)'
+              : 'linear-gradient(135deg, #2563eb, #3b82f6)',
             border: 'none',
             borderRadius: '6px',
             color: '#ffffff',
             cursor: 'pointer',
+            boxShadow: isPlaying
+              ? '0 0 12px rgba(245, 158, 11, 0.4)'
+              : '0 0 12px rgba(37, 99, 235, 0.4)',
           }}
         >
-          {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+          {isPlaying ? <Pause size={18} /> : <Play size={18} fill="#ffffff" />}
         </button>
 
         <button
@@ -135,9 +143,9 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
           disabled={currentPly >= totalPlies}
           title="Next Move (→)"
           style={{
-            padding: '8px',
-            backgroundColor: '#1e293b',
-            border: 'none',
+            padding: '8px 10px',
+            backgroundColor: 'rgba(30, 41, 59, 0.8)',
+            border: '1px solid rgba(255, 255, 255, 0.06)',
             borderRadius: '6px',
             color: currentPly >= totalPlies ? '#475569' : '#f8fafc',
             cursor: currentPly >= totalPlies ? 'default' : 'pointer',
@@ -151,9 +159,9 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
           disabled={currentPly >= totalPlies}
           title="Last Move (End)"
           style={{
-            padding: '8px',
-            backgroundColor: '#1e293b',
-            border: 'none',
+            padding: '8px 10px',
+            backgroundColor: 'rgba(30, 41, 59, 0.8)',
+            border: '1px solid rgba(255, 255, 255, 0.06)',
             borderRadius: '6px',
             color: currentPly >= totalPlies ? '#475569' : '#f8fafc',
             cursor: currentPly >= totalPlies ? 'default' : 'pointer',
@@ -163,16 +171,25 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
         </button>
       </div>
 
-      {/* Move Info */}
+      {/* Move Info Pill */}
       <div
         style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          backgroundColor: 'rgba(30, 41, 59, 0.6)',
+          border: '1px solid rgba(255, 255, 255, 0.06)',
+          padding: '4px 10px',
+          borderRadius: '20px',
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: '12px',
           fontWeight: 700,
-          color: '#94a3b8',
+          color: '#e2e8f0',
         }}
       >
-        Ply {currentPly} / {totalPlies}
+        <span style={{ color: '#38bdf8' }}>Ply {currentPly}</span>
+        <span style={{ color: '#64748b' }}>/</span>
+        <span style={{ color: '#94a3b8' }}>{totalPlies}</span>
       </div>
     </div>
   );

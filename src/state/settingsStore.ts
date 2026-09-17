@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { EngineMode, ENGINE_PRESETS } from '../engine/stockfish/EngineTypes';
 import { EngineManager } from '../engine/stockfish/EngineManager';
 
-export type BoardTheme = 'tournament' | 'dark' | 'glass' | 'wood';
+export type BoardTheme = 'tournament' | 'dark' | 'glass' | 'wood' | 'midnight';
 
 interface SettingsState {
   engineMode: EngineMode;
@@ -24,9 +24,9 @@ interface SettingsState {
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
-  engineMode: 'balanced',
-  depth: 16,
-  hash: 32,
+  engineMode: 'max',
+  depth: 24,
+  hash: 128,
   multiPv: 1,
   soundEnabled: true,
   soundVolume: 0.6,

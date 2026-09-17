@@ -5,7 +5,7 @@ export class AnalysisCache {
   private static instance: AnalysisCache | null = null;
   private memoryLru = new Map<string, EngineAnalysisResult>();
   private readonly MAX_MEMORY_ITEMS = 1000;
-  private readonly ENGINE_VERSION = 'sf19_v1';
+  private readonly ENGINE_VERSION = 'sf19_v2';
 
   public static getInstance(): AnalysisCache {
     if (!AnalysisCache.instance) {

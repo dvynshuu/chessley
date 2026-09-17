@@ -20,23 +20,29 @@ export const PlayerHeader: React.FC<PlayerHeaderProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '6px 12px',
-        backgroundColor: '#0f172a',
-        borderRadius: '6px',
-        border: `1px solid ${isTurn ? '#38bdf8' : 'rgba(255, 255, 255, 0.08)'}`,
+        padding: '8px 14px',
+        backgroundColor: isTurn ? 'rgba(30, 41, 59, 0.75)' : 'rgba(15, 23, 42, 0.65)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderRadius: '10px',
+        border: isTurn ? '1px solid rgba(56, 189, 248, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
+        boxShadow: isTurn
+          ? '0 4px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(56, 189, 248, 0.2)'
+          : '0 4px 12px rgba(0, 0, 0, 0.3)',
         width: '100%',
         maxWidth: '640px',
-        transition: 'border-color 0.2s',
+        transition: 'all 0.2s ease',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <div
           style={{
-            width: '14px',
-            height: '14px',
+            width: '18px',
+            height: '18px',
             borderRadius: '50%',
-            backgroundColor: isWhite ? '#ffffff' : '#0f172a',
-            border: '2px solid #64748b',
+            backgroundColor: isWhite ? '#f8fafc' : '#0f172a',
+            border: isWhite ? '2px solid #94a3b8' : '2px solid #475569',
+            boxShadow: isWhite ? '0 0 8px rgba(255, 255, 255, 0.4)' : 'inset 0 0 4px rgba(0, 0, 0, 0.8)',
           }}
         />
         {player.title && (
@@ -46,18 +52,19 @@ export const PlayerHeader: React.FC<PlayerHeaderProps> = ({
               fontWeight: 800,
               backgroundColor: '#e11d48',
               color: '#ffffff',
-              padding: '1px 4px',
-              borderRadius: '3px',
+              padding: '1px 5px',
+              borderRadius: '4px',
+              letterSpacing: '0.4px',
             }}
           >
             {player.title}
           </span>
         )}
-        <span style={{ fontSize: '13px', fontWeight: 700, color: '#f8fafc' }}>
+        <span style={{ fontSize: '13px', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.2px' }}>
           {player.name}
         </span>
         {player.rating && (
-          <span style={{ fontSize: '12px', color: '#94a3b8', fontFamily: "'JetBrains Mono', monospace" }}>
+          <span style={{ fontSize: '12px', color: '#94a3b8', fontFamily: "'JetBrains Mono', monospace", fontWeight: 600 }}>
             ({player.rating})
           </span>
         )}
@@ -70,7 +77,12 @@ export const PlayerHeader: React.FC<PlayerHeaderProps> = ({
             fontWeight: 800,
             textTransform: 'uppercase',
             color: '#38bdf8',
+            backgroundColor: 'rgba(56, 189, 248, 0.15)',
+            border: '1px solid rgba(56, 189, 248, 0.35)',
+            padding: '2px 8px',
+            borderRadius: '12px',
             letterSpacing: '0.5px',
+            boxShadow: '0 0 8px rgba(56, 189, 248, 0.3)',
           }}
         >
           To Move

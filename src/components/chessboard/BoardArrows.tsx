@@ -51,19 +51,50 @@ export const BoardArrows: React.FC<BoardArrowsProps> = ({ arrows, orientation })
       }}
     >
       <defs>
-        {arrows.map((arr, i) => (
-          <marker
-            key={`marker_${i}`}
-            id={`arrowhead_${i}`}
-            markerWidth="5"
-            markerHeight="5"
-            refX="3.2"
-            refY="2.5"
-            orient="auto"
-          >
-            <polygon points="0 0.8, 4.5 2.5, 0 4.2" fill={arr.color} />
-          </marker>
-        ))}
+        {/* Glow Filters */}
+        <filter id="arrow-glow-emerald" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="0" stdDeviation="1.2" floodColor="#10b981" floodOpacity="0.75" />
+        </filter>
+        <filter id="arrow-glow-red" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="0" stdDeviation="1.2" floodColor="#ef4444" floodOpacity="0.75" />
+        </filter>
+        <filter id="arrow-glow-orange" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="0" stdDeviation="1.2" floodColor="#f97316" floodOpacity="0.75" />
+        </filter>
+
+        {/* Gradients */}
+        <linearGradient id="grad-emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#10b981" />
+          <stop offset="100%" stopColor="#34d399" />
+        </linearGradient>
+        <linearGradient id="grad-red" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ef4444" />
+          <stop offset="100%" stopColor="#f87171" />
+        </linearGradient>
+        <linearGradient id="grad-orange" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#f97316" />
+          <stop offset="100%" stopColor="#fb923c" />
+        </linearGradient>
+
+        {arrows.map((arr, i) => {
+          const isEmerald = arr.color.includes('10b981') || arr.color === '#10b981';
+          const isRed = arr.color.includes('ef4444') || arr.color === '#ef4444';
+          const fillColor = isEmerald ? 'url(#grad-emerald)' : isRed ? 'url(#grad-red)' : arr.color;
+
+          return (
+            <marker
+              key={`marker_${i}`}
+              id={`arrowhead_${i}`}
+              markerWidth="6"
+              markerHeight="6"
+              refX="3.5"
+              refY="3"
+              orient="auto"
+            >
+              <polygon points="0 1, 5 3, 0 5" fill={fillColor} />
+            </marker>
+          );
+        })}
       </defs>
 
       {arrows.map((arr, i) => {
@@ -77,19 +108,24 @@ export const BoardArrows: React.FC<BoardArrowsProps> = ({ arrows, orientation })
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist === 0) return null;
 
-        const shorten = 3.5;
+        const shorten = 3.6;
         const endX = p2.x - (dx / dist) * shorten;
         const endY = p2.y - (dy / dist) * shorten;
 
+        const isEmerald = arr.color.includes('10b981') || arr.color === '#10b981';
+        const isRed = arr.color.includes('ef4444') || arr.color === '#ef4444';
+        const strokeColor = isEmerald ? 'url(#grad-emerald)' : isRed ? 'url(#grad-red)' : arr.color;
+        const filterId = isEmerald ? 'url(#arrow-glow-emerald)' : isRed ? 'url(#arrow-glow-red)' : undefined;
+
         return (
-          <g key={`arrow_${i}`} opacity={arr.opacity ?? 0.85}>
+          <g key={`arrow_${i}`} opacity={arr.opacity ?? 0.9} filter={filterId}>
             <line
               x1={p1.x}
               y1={p1.y}
               x2={endX}
               y2={endY}
-              stroke={arr.color}
-              strokeWidth={arr.width ?? 2.8}
+              stroke={strokeColor}
+              strokeWidth={arr.width ?? 3.0}
               strokeLinecap="round"
               markerEnd={`url(#arrowhead_${i})`}
             />

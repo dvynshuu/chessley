@@ -48,6 +48,7 @@ export const App: React.FC = () => {
 
   const {
     engineMode,
+    depth,
     boardTheme,
     showArrows,
     soundEnabled,
@@ -75,11 +76,14 @@ export const App: React.FC = () => {
 
   // Request high-priority live interactive engine evaluation when navigating moves
   useEffect(() => {
-    // If not analyzing whole game, run interactive evaluation on current FEN
+    // If not analyzing whole game, run interactive evaluation on current FEN with subtle debounce
     if (analysisStatus !== 'analyzing') {
-      evaluateCurrentPosition(currentFen, 16);
+      const timer = setTimeout(() => {
+        evaluateCurrentPosition(currentFen, depth);
+      }, 60);
+      return () => clearTimeout(timer);
     }
-  }, [currentFen, analysisStatus, evaluateCurrentPosition]);
+  }, [currentFen, analysisStatus, depth, evaluateCurrentPosition]);
 
   // Top and bottom players according to board orientation
   const topPlayer = orientation === 'w' ? game.black : game.white;
@@ -100,7 +104,7 @@ export const App: React.FC = () => {
   const activeScore = interactiveResult?.normalizedScore || currentMoveAnalysis?.playedScoreAfter || null;
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#090d16' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'transparent' }}>
       {/* Top Navigation */}
       <Navbar
         analysisStatus={analysisStatus}
