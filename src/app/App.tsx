@@ -14,6 +14,7 @@ import { GameImportModal } from '../components/game-import/GameImportModal';
 import { GameSummaryModal } from '../components/game-summary/GameSummaryModal';
 import { ExportModal } from '../components/export/ExportModal';
 import { SettingsModal } from '../components/settings/SettingsModal';
+import { SplashScreen } from '../components/ui/SplashScreen';
 import { FEATURED_GAMES } from '../integrations/chesscom/GameResolver';
 
 export const App: React.FC = () => {
@@ -105,6 +106,9 @@ export const App: React.FC = () => {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'transparent' }}>
+      {/* Dynamic Animated Startup Splash Screen */}
+      <SplashScreen />
+
       {/* Accessibility Skip Link */}
       <a href="#main-board" className="sr-only">
         Skip to main chessboard

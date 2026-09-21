@@ -2,15 +2,112 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Chessley — Precision Chess.com Stockfish 19 Game Analyzer</title>
-    <meta name="description" content="Lightning-fast, high-accuracy Chess.com game analysis powered by real Stockfish 19 WebAssembly in your browser." />
+    <meta name="description" content="Lightning-fast, high-accuracy Chess.com and PGN game analysis powered by real Stockfish 19 WebAssembly in your browser." />
+    
+    <!-- Icons & PWA Metadata -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#060911" />
+    <meta name="apple-mobile-web-app-title" content="Chessley" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <!-- Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+      /* Zero-FOUC instant pre-hydration splash */
+      #preloader-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        background-color: #060911;
+        background-image: radial-gradient(circle at 50% 45%, rgba(200, 170, 110, 0.12) 0%, transparent 60%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Inter', -apple-system, sans-serif;
+        transition: opacity 0.4s ease;
+      }
+      .preloader-emblem {
+        width: 100px;
+        height: 100px;
+        border-radius: 26px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(200, 170, 110, 0.2);
+        border: 1px solid rgba(200, 170, 110, 0.3);
+        animation: preloaderPulse 2s ease-in-out infinite alternate;
+      }
+      .preloader-title {
+        margin-top: 18px;
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: 4px;
+        color: #f8fafc;
+        text-transform: uppercase;
+      }
+      .preloader-bar {
+        margin-top: 14px;
+        width: 140px;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 2px;
+        overflow: hidden;
+        position: relative;
+      }
+      .preloader-bar-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 45%;
+        background: linear-gradient(90deg, #c8aa6e, #f8fafc);
+        border-radius: 2px;
+        animation: preloaderSlide 1.2s infinite ease-in-out;
+      }
+      @keyframes preloaderPulse {
+        0% { transform: scale(0.97); }
+        100% { transform: scale(1.03); }
+      }
+      @keyframes preloaderSlide {
+        0% { left: -40%; width: 30%; }
+        50% { left: 30%; width: 50%; }
+        100% { left: 100%; width: 30%; }
+      }
+    </style>
   </head>
   <body>
+    <!-- Instant Preloader Splash Screen -->
+    <div id="preloader-splash">
+      <img class="preloader-emblem" src="/icons/icon-192x192.png" alt="Chessley" />
+      <div class="preloader-title">CHESSLEY</div>
+      <div class="preloader-bar">
+        <div class="preloader-bar-fill"></div>
+      </div>
+    </div>
+
     <div id="root"></div>
+
+    <script>
+      // Smoothly dissolve preloader once app bundles initialize
+      window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+          const preloader = document.getElementById('preloader-splash');
+          if (preloader) {
+            preloader.style.opacity = '0';
+            setTimeout(() => preloader.remove(), 400);
+          }
+        }, 300);
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

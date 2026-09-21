@@ -1,6 +1,7 @@
 import React from 'react';
 import { Play, Pause, RotateCcw, Upload, Settings, Award, Download, CheckCircle } from 'lucide-react';
 import { AnalysisGlobalStatus } from '../../state/analysisStore';
+import { ChessleyLogo } from './ChessleyLogo';
 
 interface NavbarProps {
   analysisStatus: AnalysisGlobalStatus;
@@ -48,44 +49,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     >
       {/* Brand */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div
-          style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '10px',
-            background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 0 18px rgba(99, 102, 241, 0.5)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-          }}
-        >
-          <span style={{ fontSize: '20px', fontWeight: 900, color: '#ffffff', textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>♟</span>
-        </div>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '17px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.3px' }}>
-              Chessley
-            </span>
-            <span
-              style={{
-                fontSize: '10px',
-                fontWeight: 800,
-                padding: '2px 7px',
-                borderRadius: '5px',
-                background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.35), rgba(56, 189, 248, 0.35))',
-                color: '#c4b5fd',
-                border: '1px solid rgba(167, 139, 250, 0.5)',
-                letterSpacing: '0.4px',
-                boxShadow: '0 0 10px rgba(167, 139, 250, 0.25)',
-              }}
-            >
-              v2.0 MAX
-            </span>
-          </div>
-          <div style={{ fontSize: '11px', color: '#94a3b8', letterSpacing: '0.2px' }}>Precision Multi-Core Workstation</div>
-        </div>
+        <ChessleyLogo size={36} withWordmark />
       </div>
 
       {/* Center Actions / Analysis Control */}
