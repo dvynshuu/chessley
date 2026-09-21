@@ -22,6 +22,11 @@ export const EvaluationBar: React.FC<EvaluationBarProps> = ({
 
   return (
     <div
+      role="meter"
+      aria-label={`Position evaluation: ${scoreText}`}
+      aria-valuenow={Math.round(displayPercent)}
+      aria-valuemin={0}
+      aria-valuemax={100}
       style={{
         width: '36px',
         height: '100%',
@@ -96,6 +101,7 @@ export const EvaluationBar: React.FC<EvaluationBarProps> = ({
 
       {/* Floating Glass Score Text Badge */}
       <div
+        className="tabular-nums"
         style={{
           position: 'absolute',
           left: '3px',
@@ -130,6 +136,7 @@ export const EvaluationBar: React.FC<EvaluationBarProps> = ({
       {/* Pulsing indicator when Stockfish is actively calculating */}
       {isAnalyzing && (
         <div
+          aria-hidden="true"
           style={{
             position: 'absolute',
             top: '4px',

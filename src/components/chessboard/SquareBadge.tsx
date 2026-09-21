@@ -12,6 +12,8 @@ export const SquareBadge: React.FC<SquareBadgeProps> = ({ classification }) => {
 
   return (
     <div
+      role="img"
+      aria-label={`${meta.name}: ${meta.description}`}
       title={`${meta.name}: ${meta.description}`}
       style={{
         position: 'absolute',

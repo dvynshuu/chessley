@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSettingsStore, BoardTheme } from '../../state/settingsStore';
 import { EngineMode } from '../../engine/stockfish/EngineTypes';
 import { X, Volume2, VolumeX, Eye, Sliders, Palette } from 'lucide-react';
@@ -22,10 +22,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
     setBoardTheme,
   } = useSettingsStore();
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
     <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       style={{
         position: 'fixed',
         inset: 0,
@@ -39,6 +53,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
       }}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-modal-title"
         style={{
           width: '100%',
           maxWidth: '520px',
@@ -65,18 +82,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
             borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
           }}
         >
-          <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>Settings & Engine</h2>
+          <h2 id="settings-modal-title" className="text-balance" style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>
+            Settings & Engine
+          </h2>
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Close settings modal"
             style={{
               background: 'none',
               border: 'none',
               color: '#94a3b8',
               cursor: 'pointer',
-              padding: '4px',
+              padding: '6px',
+              borderRadius: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'color 150ms ease, background-color 150ms ease',
             }}
           >
-            <X size={20} />
+            <X size={20} aria-hidden="true" />
           </button>
         </div>
 
@@ -95,14 +121,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 gap: '6px',
               }}
             >
-              <Palette size={16} color="#38bdf8" />
-              Board Theme
+              <Palette size={16} color="#38bdf8" aria-hidden="true" />
+              <span>Board Theme</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
               {(['tournament', 'dark', 'glass', 'wood', 'midnight'] as BoardTheme[]).map((theme) => (
                 <button
+                  type="button"
                   key={theme}
                   onClick={() => setBoardTheme(theme)}
+                  aria-pressed={boardTheme === theme}
                   style={{
                     padding: '8px 4px',
                     backgroundColor:
@@ -122,6 +150,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                     cursor: 'pointer',
                     textTransform: 'capitalize',
                     boxShadow: boardTheme === theme ? '0 0 10px rgba(37, 99, 235, 0.5)' : 'none',
+                    transition: 'background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease',
                   }}
                 >
                   {theme}
@@ -143,14 +172,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 gap: '6px',
               }}
             >
-              <Sliders size={16} color="#10b981" />
-              Analysis Profile
+              <Sliders size={16} color="#10b981" aria-hidden="true" />
+              <span>Analysis Profile</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
               {(['fast', 'balanced', 'deep', 'max'] as EngineMode[]).map((mode) => (
                 <button
+                  type="button"
                   key={mode}
                   onClick={() => setEngineMode(mode)}
+                  aria-pressed={engineMode === mode}
                   style={{
                     padding: '8px',
                     backgroundColor:
@@ -170,6 +201,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                     cursor: 'pointer',
                     textTransform: 'capitalize',
                     boxShadow: engineMode === mode && mode === 'max' ? '0 0 10px rgba(124, 58, 237, 0.5)' : 'none',
+                    transition: 'background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease',
                   }}
                 >
                   {mode === 'max' ? '★ Max' : mode}
@@ -180,16 +212,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
             {/* Depth Slider */}
             <div style={{ marginTop: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
-                <span style={{ color: '#94a3b8' }}>Target Depth (Up to Max Level 30)</span>
-                <span style={{ fontWeight: 700, color: depth >= 24 ? '#a78bfa' : '#38bdf8' }}>{depth}</span>
+                <label htmlFor="settings-depth-slider" style={{ color: '#94a3b8', cursor: 'pointer' }}>
+                  Target Depth (Up to Max Level 30)
+                </label>
+                <span className="tabular-nums" style={{ fontWeight: 700, color: depth >= 24 ? '#a78bfa' : '#38bdf8' }}>
+                  {depth}
+                </span>
               </div>
               <input
+                id="settings-depth-slider"
                 type="range"
                 min={10}
                 max={30}
                 value={depth}
                 onChange={(e) => setDepth(parseInt(e.target.value, 10))}
-                style={{ width: '100%', accentColor: depth >= 24 ? '#7c3aed' : '#2563eb' }}
+                aria-label="Target engine calculation depth"
+                style={{ width: '100%', accentColor: depth >= 24 ? '#7c3aed' : '#2563eb', cursor: 'pointer' }}
               />
             </div>
           </div>
@@ -200,29 +238,41 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
               Preferences
             </div>
 
-            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
+            <label
+              htmlFor="settings-show-arrows"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
+            >
               <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Eye size={16} color="#38bdf8" />
-                Show Best Move & Blunder Arrows
+                <Eye size={16} color="#38bdf8" aria-hidden="true" />
+                Show Best Move &amp; Blunder Arrows
               </span>
               <input
+                id="settings-show-arrows"
                 type="checkbox"
                 checked={showArrows}
                 onChange={(e) => setShowArrows(e.target.checked)}
-                style={{ accentColor: '#2563eb', transform: 'scale(1.2)' }}
+                style={{ accentColor: '#2563eb', transform: 'scale(1.2)', cursor: 'pointer' }}
               />
             </label>
 
-            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
+            <label
+              htmlFor="settings-sound-enabled"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
+            >
               <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {soundEnabled ? <Volume2 size={16} color="#10b981" /> : <VolumeX size={16} color="#64748b" />}
+                {soundEnabled ? (
+                  <Volume2 size={16} color="#10b981" aria-hidden="true" />
+                ) : (
+                  <VolumeX size={16} color="#64748b" aria-hidden="true" />
+                )}
                 Procedural Sound Synthesizer
               </span>
               <input
+                id="settings-sound-enabled"
                 type="checkbox"
                 checked={soundEnabled}
                 onChange={(e) => setSoundEnabled(e.target.checked)}
-                style={{ accentColor: '#2563eb', transform: 'scale(1.2)' }}
+                style={{ accentColor: '#2563eb', transform: 'scale(1.2)', cursor: 'pointer' }}
               />
             </label>
           </div>
@@ -231,3 +281,4 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
     </div>
   );
 };
+

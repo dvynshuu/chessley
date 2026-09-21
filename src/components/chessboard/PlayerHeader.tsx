@@ -31,11 +31,12 @@ export const PlayerHeader: React.FC<PlayerHeaderProps> = ({
           : '0 4px 12px rgba(0, 0, 0, 0.3)',
         width: '100%',
         maxWidth: '640px',
-        transition: 'all 0.2s ease',
+        transition: 'background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, overflow: 'hidden' }}>
         <div
+          aria-hidden="true"
           style={{
             width: '18px',
             height: '18px',
@@ -43,6 +44,7 @@ export const PlayerHeader: React.FC<PlayerHeaderProps> = ({
             backgroundColor: isWhite ? '#f8fafc' : '#0f172a',
             border: isWhite ? '2px solid #94a3b8' : '2px solid #475569',
             boxShadow: isWhite ? '0 0 8px rgba(255, 255, 255, 0.4)' : 'inset 0 0 4px rgba(0, 0, 0, 0.8)',
+            flexShrink: 0,
           }}
         />
         {player.title && (
@@ -55,16 +57,37 @@ export const PlayerHeader: React.FC<PlayerHeaderProps> = ({
               padding: '1px 5px',
               borderRadius: '4px',
               letterSpacing: '0.4px',
+              flexShrink: 0,
             }}
           >
             {player.title}
           </span>
         )}
-        <span style={{ fontSize: '13px', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.2px' }}>
+        <span
+          style={{
+            fontSize: '13px',
+            fontWeight: 800,
+            color: '#f8fafc',
+            letterSpacing: '-0.2px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            minWidth: 0,
+          }}
+        >
           {player.name}
         </span>
         {player.rating && (
-          <span style={{ fontSize: '12px', color: '#94a3b8', fontFamily: "'JetBrains Mono', monospace", fontWeight: 600 }}>
+          <span
+            className="tabular-nums"
+            style={{
+              fontSize: '12px',
+              color: '#94a3b8',
+              fontFamily: "'JetBrains Mono', monospace",
+              fontWeight: 600,
+              flexShrink: 0,
+            }}
+          >
             ({player.rating})
           </span>
         )}
@@ -72,6 +95,7 @@ export const PlayerHeader: React.FC<PlayerHeaderProps> = ({
 
       {isTurn && (
         <span
+          aria-live="polite"
           style={{
             fontSize: '10px',
             fontWeight: 800,
@@ -83,6 +107,8 @@ export const PlayerHeader: React.FC<PlayerHeaderProps> = ({
             borderRadius: '12px',
             letterSpacing: '0.5px',
             boxShadow: '0 0 8px rgba(56, 189, 248, 0.3)',
+            flexShrink: 0,
+            marginLeft: '8px',
           }}
         >
           To Move

@@ -62,7 +62,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Cpu size={16} color={engineMode === 'max' ? '#a78bfa' : '#38bdf8'} />
+          <Cpu size={16} color={engineMode === 'max' ? '#a78bfa' : '#38bdf8'} aria-hidden="true" />
           <span style={{ fontSize: '13px', fontWeight: 700, color: '#f8fafc', letterSpacing: '-0.2px' }}>
             Stockfish 19 {engineMode === 'max' ? 'Max Level' : 'WASM'}
           </span>
@@ -83,6 +83,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
           )}
           {isEvaluating && (
             <span
+              aria-live="polite"
               style={{
                 fontSize: '11px',
                 color: '#10b981',
@@ -92,6 +93,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
               }}
             >
               <span
+                aria-hidden="true"
                 style={{
                   width: '6px',
                   height: '6px',
@@ -100,7 +102,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
                   animation: 'pulse 1s infinite',
                 }}
               />
-              evaluating
+              Evaluating…
             </span>
           )}
         </div>
@@ -110,6 +112,8 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
           {(['fast', 'balanced', 'deep', 'max'] as EngineMode[]).map((mode) => (
             <button
               key={mode}
+              type="button"
+              aria-pressed={engineMode === mode}
               onClick={() => onSetEngineMode(mode)}
               style={{
                 padding: '3px 8px',
@@ -126,7 +130,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
                 color: engineMode === mode ? '#ffffff' : '#94a3b8',
                 cursor: 'pointer',
                 textTransform: 'capitalize',
-                transition: 'background-color 0.1s',
+                transition: 'background-color 0.1s ease, color 0.1s ease',
                 boxShadow: engineMode === mode && mode === 'max' ? '0 0 8px rgba(124, 58, 237, 0.4)' : 'none',
               }}
             >
@@ -158,6 +162,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
             Evaluation
           </div>
           <div
+            className="tabular-nums"
             style={{
               fontSize: '17px',
               fontWeight: 800,
@@ -183,6 +188,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
             Depth
           </div>
           <div
+            className="tabular-nums"
             style={{
               fontSize: '17px',
               fontWeight: 800,
@@ -208,6 +214,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
             Nodes / NPS
           </div>
           <div
+            className="tabular-nums"
             style={{
               fontSize: '13px',
               fontWeight: 700,
@@ -236,7 +243,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Award size={18} color={CLASSIFICATION_META[currentMoveAnalysis.classification]?.color} />
+            <Award size={18} color={CLASSIFICATION_META[currentMoveAnalysis.classification]?.color} aria-hidden="true" />
             <div>
               <span
                 style={{
@@ -247,7 +254,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
               >
                 {CLASSIFICATION_META[currentMoveAnalysis.classification]?.name} ({currentMoveAnalysis.san})
               </span>
-              <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
+              <div className="tabular-nums" style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
                 Accuracy: {currentMoveAnalysis.moveAccuracy}% | Loss: -{currentMoveAnalysis.winProbabilityLoss}%
               </div>
             </div>
@@ -288,6 +295,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
           </span>
           {bestMove && (
             <span
+              className="tabular-nums"
               style={{
                 fontSize: '12px',
                 fontWeight: 800,
@@ -333,7 +341,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
               </span>
             ))
           ) : (
-            <span style={{ color: '#64748b', fontStyle: 'italic' }}>Calculating principal variation...</span>
+            <span style={{ color: '#64748b', fontStyle: 'italic' }}>Calculating principal variation…</span>
           )}
         </div>
       </div>

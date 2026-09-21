@@ -16,7 +16,7 @@ export const MoveList: React.FC<MoveListProps> = ({
   currentPly,
   onSelectPly,
 }) => {
-  const activeItemRef = useRef<HTMLDivElement | null>(null);
+  const activeItemRef = useRef<HTMLButtonElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   // Group moves into pairs (1. White Black, 2. White Black)
@@ -69,6 +69,7 @@ export const MoveList: React.FC<MoveListProps> = ({
         return (
           <div
             key={`move_row_${pair.moveNumber}`}
+            className="virtual-row tabular-nums"
             style={{
               display: 'grid',
               gridTemplateColumns: '40px 1fr 1fr',
@@ -86,15 +87,18 @@ export const MoveList: React.FC<MoveListProps> = ({
 
             {/* White Move */}
             {pair.white ? (
-              <div
+              <button
+                type="button"
                 ref={isWhiteActive ? activeItemRef : undefined}
-                onClick={() => onSelectPly(pair.white.ply)}
+                onClick={() => onSelectPly(pair.white!.ply)}
+                aria-label={`Move ${pair.moveNumber}, White: ${pair.white.san}`}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '5px 8px',
                   borderRadius: '6px',
+                  border: 'none',
                   background: isWhiteActive
                     ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.95), rgba(59, 130, 246, 0.85))'
                     : 'transparent',
@@ -105,7 +109,9 @@ export const MoveList: React.FC<MoveListProps> = ({
                     ? '0 2px 10px rgba(37, 99, 235, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.25)'
                     : 'none',
                   borderLeft: isWhiteActive ? '3px solid #38bdf8' : '3px solid transparent',
-                  transition: 'all 0.12s ease',
+                  transition: 'background-color 0.12s ease, border-left-color 0.12s ease, box-shadow 0.12s ease',
+                  fontFamily: 'inherit',
+                  fontSize: 'inherit',
                 }}
               >
                 <span>{pair.white.san}</span>
@@ -135,22 +141,25 @@ export const MoveList: React.FC<MoveListProps> = ({
                     </span>
                   </span>
                 )}
-              </div>
+              </button>
             ) : (
               <div />
             )}
 
             {/* Black Move */}
             {pair.black ? (
-              <div
+              <button
+                type="button"
                 ref={isBlackActive ? activeItemRef : undefined}
-                onClick={() => onSelectPly(pair.black.ply)}
+                onClick={() => onSelectPly(pair.black!.ply)}
+                aria-label={`Move ${pair.moveNumber}, Black: ${pair.black.san}`}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '5px 8px',
                   borderRadius: '6px',
+                  border: 'none',
                   background: isBlackActive
                     ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.95), rgba(59, 130, 246, 0.85))'
                     : 'transparent',
@@ -161,8 +170,10 @@ export const MoveList: React.FC<MoveListProps> = ({
                     ? '0 2px 10px rgba(37, 99, 235, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.25)'
                     : 'none',
                   borderLeft: isBlackActive ? '3px solid #38bdf8' : '3px solid transparent',
-                  transition: 'all 0.12s ease',
+                  transition: 'background-color 0.12s ease, border-left-color 0.12s ease, box-shadow 0.12s ease',
                   marginLeft: '4px',
+                  fontFamily: 'inherit',
+                  fontSize: 'inherit',
                 }}
               >
                 <span>{pair.black.san}</span>
@@ -192,7 +203,7 @@ export const MoveList: React.FC<MoveListProps> = ({
                     </span>
                   </span>
                 )}
-              </div>
+              </button>
             ) : (
               <div />
             )}

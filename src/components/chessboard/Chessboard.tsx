@@ -247,17 +247,33 @@ export const Chessboard: React.FC<ChessboardProps> = ({
             // Background square color
             const bg = isLight ? currentTheme.light : currentTheme.dark;
 
+            const isInteractiveSquare = (piece && piece.color === sideToMove) || isDestination;
+            const squareLabel = piece
+              ? `${square} ${piece.color === 'w' ? 'white' : 'black'} ${piece.type}`
+              : isDestination
+              ? `${square} legal destination`
+              : square;
+
             return (
               <div
                 key={square}
+                role={isInteractiveSquare ? 'button' : undefined}
+                tabIndex={isInteractiveSquare ? 0 : undefined}
+                aria-label={squareLabel}
                 onClick={() => handleSquareClick(square)}
+                onKeyDown={(e) => {
+                  if (isInteractiveSquare && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    handleSquareClick(square);
+                  }
+                }}
                 style={{
                   position: 'relative',
                   backgroundColor: bg,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  cursor: piece && piece.color === sideToMove ? 'pointer' : isDestination ? 'pointer' : 'default',
+                  cursor: isInteractiveSquare ? 'pointer' : 'default',
                   transition: 'background-color 0.15s ease',
                   overflow: 'hidden',
                 }}
@@ -411,39 +427,45 @@ export const Chessboard: React.FC<ChessboardProps> = ({
               border: '1px solid rgba(255, 255, 255, 0.16)',
             }}
           >
-            {['q', 'r', 'b', 'n'].map((promoPiece) => (
-              <button
-                key={promoPiece}
-                onClick={() => {
-                  executeMove(promotionPending.from, promotionPending.to, promoPiece);
-                  setPromotionPending(null);
-                }}
-                style={{
-                  width: '60px',
-                  height: '60px',
-                  backgroundColor: 'rgba(51, 65, 85, 0.8)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#475569';
-                  e.currentTarget.style.transform = 'translateY(-2px) scale(1.05)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(51, 65, 85, 0.8)';
-                  e.currentTarget.style.transform = 'none';
-                }}
-              >
-                <div style={{ width: '44px', height: '44px' }}>
-                  <PieceSvg piece={promoPiece} color={sideToMove} />
-                </div>
-              </button>
-            ))}
+            {['q', 'r', 'b', 'n'].map((promoPiece) => {
+              const pieceName = promoPiece === 'q' ? 'Queen' : promoPiece === 'r' ? 'Rook' : promoPiece === 'b' ? 'Bishop' : 'Knight';
+              return (
+                <button
+                  key={promoPiece}
+                  type="button"
+                  aria-label={`Promote pawn to ${pieceName}`}
+                  onClick={() => {
+                    executeMove(promotionPending.from, promotionPending.to, promoPiece);
+                    setPromotionPending(null);
+                  }}
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    backgroundColor: 'rgba(51, 65, 85, 0.8)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
+                    transition: 'background-color 0.15s ease, transform 0.1s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#475569';
+                    e.currentTarget.style.transform = 'translateY(-2px) scale(1.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(51, 65, 85, 0.8)';
+                    e.currentTarget.style.transform = 'none';
+                  }}
+                >
+                  <div style={{ width: '44px', height: '44px' }}>
+                    <PieceSvg piece={promoPiece} color={sideToMove} />
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

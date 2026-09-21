@@ -40,6 +40,7 @@ export const BoardArrows: React.FC<BoardArrowsProps> = ({ arrows, orientation })
   return (
     <svg
       viewBox="0 0 100 100"
+      aria-hidden="true"
       style={{
         position: 'absolute',
         top: 0,

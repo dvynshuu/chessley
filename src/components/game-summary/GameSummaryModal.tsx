@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { GameSummary, ChessGame, MoveAnalysis } from '../../chess/types';
 import { CLASSIFICATION_META } from '../../chess/Classification';
 import { X, Award, AlertTriangle, Download } from 'lucide-react';
@@ -22,6 +22,17 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
   onSelectPly,
   onOpenExport,
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const classifications = [
@@ -38,6 +49,12 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="summary-modal-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       style={{
         position: 'fixed',
         inset: 0,
@@ -80,13 +97,17 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
           }}
         >
           <div>
-            <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>Game Review & Accuracy</h2>
+            <h2 id="summary-modal-title" className="text-balance" style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>
+              Game Review & Accuracy
+            </h2>
             <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
               {game.white.name} vs {game.black.name} ({game.result})
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Close game review dialog"
             style={{
               background: 'none',
               border: 'none',
@@ -95,7 +116,7 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
               padding: '4px',
             }}
           >
-            <X size={20} />
+            <X size={20} aria-hidden="true" />
           </button>
         </div>
 
@@ -131,6 +152,7 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
                 {game.white.name} (White)
               </div>
               <div
+                className="tabular-nums"
                 style={{
                   fontSize: '36px',
                   fontWeight: 900,
@@ -158,6 +180,7 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
                 {game.black.name} (Black)
               </div>
               <div
+                className="tabular-nums"
                 style={{
                   fontSize: '36px',
                   fontWeight: 900,
@@ -192,52 +215,58 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
                 gap: '6px',
               }}
             >
-              <Award size={16} color="#38bdf8" />
+              <Award size={16} color="#38bdf8" aria-hidden="true" />
               Move Classification Breakdown
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              {classifications.map((key) => {
-                const meta = CLASSIFICATION_META[key];
-                const countW = summary.classificationCounts.w[key] || 0;
-                const countB = summary.classificationCounts.b[key] || 0;
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+              <caption className="sr-only">Move classification breakdown comparing White and Black counts</caption>
+              <thead>
+                <tr style={{ color: '#64748b', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                  <th scope="col" style={{ padding: '4px 8px', textAlign: 'center', width: '50px' }}>White</th>
+                  <th scope="col" style={{ padding: '4px 8px', textAlign: 'center' }}>Classification</th>
+                  <th scope="col" style={{ padding: '4px 8px', textAlign: 'center', width: '50px' }}>Black</th>
+                </tr>
+              </thead>
+              <tbody>
+                {classifications.map((key) => {
+                  const meta = CLASSIFICATION_META[key];
+                  const countW = summary.classificationCounts.w[key] || 0;
+                  const countB = summary.classificationCounts.b[key] || 0;
 
-                return (
-                  <div
-                    key={key}
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: '40px 1fr 40px',
-                      alignItems: 'center',
-                      fontSize: '12px',
-                      padding: '4px 6px',
-                      borderRadius: '4px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                    }}
-                  >
-                    <span style={{ fontWeight: 700, textAlign: 'center', color: '#f8fafc' }}>
-                      {countW}
-                    </span>
-                    <span
+                  return (
+                    <tr
+                      key={key}
+                      className="tabular-nums"
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        justifyContent: 'center',
-                        color: meta.color,
-                        fontWeight: 700,
+                        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
                       }}
                     >
-                      <span>{meta.symbol}</span>
-                      <span>{meta.name}</span>
-                    </span>
-                    <span style={{ fontWeight: 700, textAlign: 'center', color: '#f8fafc' }}>
-                      {countB}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
+                      <td style={{ fontWeight: 700, textAlign: 'center', color: '#f8fafc', padding: '6px 8px' }}>
+                        {countW}
+                      </td>
+                      <td
+                        style={{
+                          textAlign: 'center',
+                          color: meta.color,
+                          fontWeight: 700,
+                          padding: '6px 8px',
+                        }}
+                      >
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                          <span aria-hidden="true">{meta.symbol}</span>
+                          <span>{meta.name}</span>
+                        </span>
+                      </td>
+                      <td style={{ fontWeight: 700, textAlign: 'center', color: '#f8fafc', padding: '6px 8px' }}>
+                        {countB}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
 
           {/* Phase Performance Breakdown */}
@@ -255,19 +284,19 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '11px', color: '#64748b' }}>Opening</div>
-                <div style={{ fontSize: '14px', fontWeight: 800, marginTop: '2px' }}>
+                <div className="tabular-nums" style={{ fontSize: '14px', fontWeight: 800, marginTop: '2px' }}>
                   W: {summary.openingAccuracy.w}% | B: {summary.openingAccuracy.b}%
                 </div>
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '11px', color: '#64748b' }}>Middlegame</div>
-                <div style={{ fontSize: '14px', fontWeight: 800, marginTop: '2px' }}>
+                <div className="tabular-nums" style={{ fontSize: '14px', fontWeight: 800, marginTop: '2px' }}>
                   W: {summary.middlegameAccuracy.w}% | B: {summary.middlegameAccuracy.b}%
                 </div>
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '11px', color: '#64748b' }}>Endgame</div>
-                <div style={{ fontSize: '14px', fontWeight: 800, marginTop: '2px' }}>
+                <div className="tabular-nums" style={{ fontSize: '14px', fontWeight: 800, marginTop: '2px' }}>
                   W: {summary.endgameAccuracy.w}% | B: {summary.endgameAccuracy.b}%
                 </div>
               </div>
@@ -295,7 +324,7 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
                   gap: '6px',
                 }}
               >
-                <AlertTriangle size={16} />
+                <AlertTriangle size={16} aria-hidden="true" />
                 Critical Moments ({summary.criticalMoments.length})
               </div>
 
@@ -308,6 +337,8 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
                   return (
                     <button
                       key={`crit_${ply}`}
+                      type="button"
+                      aria-label={`Jump to move ${a.moveNumber}${a.color === 'w' ? '' : '…'} ${a.san}, ${meta.name}`}
                       onClick={() => {
                         onSelectPly(ply);
                         onClose();
@@ -323,20 +354,21 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '2px',
+                        transition: 'background-color 0.15s ease, transform 0.1s ease',
                       }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '11px', color: '#94a3b8' }}>
-                          Move {a.moveNumber}{a.color === 'w' ? '' : '...'}
+                        <span className="tabular-nums" style={{ fontSize: '11px', color: '#94a3b8' }}>
+                          Move {a.moveNumber}{a.color === 'w' ? '' : '…'}
                         </span>
-                        <span style={{ fontSize: '12px', fontWeight: 800, color: meta.color }}>
+                        <span style={{ fontSize: '12px', fontWeight: 800, color: meta.color }} aria-hidden="true">
                           {meta.symbol}
                         </span>
                       </div>
                       <div style={{ fontSize: '13px', fontWeight: 700, color: '#f8fafc' }}>
                         {a.san}
                       </div>
-                      <div style={{ fontSize: '10px', color: '#ef4444' }}>
+                      <div className="tabular-nums" style={{ fontSize: '10px', color: '#ef4444' }}>
                         Loss: -{a.winProbabilityLoss}%
                       </div>
                     </button>
@@ -359,6 +391,7 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
           }}
         >
           <button
+            type="button"
             onClick={onOpenExport}
             style={{
               display: 'flex',
@@ -372,12 +405,14 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
               fontSize: '13px',
               fontWeight: 600,
               cursor: 'pointer',
+              transition: 'background-color 0.15s ease',
             }}
           >
-            <Download size={16} />
+            <Download size={16} aria-hidden="true" />
             Export Analysis
           </button>
           <button
+            type="button"
             onClick={onClose}
             style={{
               padding: '8px 18px',
@@ -388,6 +423,7 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
               fontSize: '13px',
               fontWeight: 600,
               cursor: 'pointer',
+              transition: 'background-color 0.15s ease',
             }}
           >
             Close Review

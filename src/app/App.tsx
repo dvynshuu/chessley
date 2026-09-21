@@ -105,6 +105,14 @@ export const App: React.FC = () => {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'transparent' }}>
+      {/* Accessibility Skip Link */}
+      <a href="#main-board" className="sr-only">
+        Skip to main chessboard
+      </a>
+
+      {/* Primary Accessible Document Heading */}
+      <h1 className="sr-only">Chessley — Precision Stockfish 19 Game Analyzer</h1>
+
       {/* Top Navigation */}
       <Navbar
         analysisStatus={analysisStatus}
@@ -144,6 +152,7 @@ export const App: React.FC = () => {
 
           {/* Board + Evaluation Bar Container */}
           <div
+            id="main-board"
             style={{
               display: 'flex',
               gap: '12px',

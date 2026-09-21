@@ -24,6 +24,11 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
   useEffect(() => {
     if (!isPlaying) return;
 
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setIsPlaying(false);
+      return;
+    }
+
     const timer = setInterval(() => {
       if (currentPly < totalPlies) {
         onNext();
@@ -87,9 +92,11 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
     >
       <div style={{ display: 'flex', gap: '6px' }}>
         <button
+          type="button"
           onClick={onFirst}
           disabled={currentPly === 0}
           title="First Move (Home)"
+          aria-label="First move (Home)"
           style={{
             padding: '8px 10px',
             backgroundColor: 'rgba(30, 41, 59, 0.8)',
@@ -99,13 +106,15 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
             cursor: currentPly === 0 ? 'default' : 'pointer',
           }}
         >
-          <ChevronFirst size={18} />
+          <ChevronFirst size={18} aria-hidden="true" />
         </button>
 
         <button
+          type="button"
           onClick={onPrev}
           disabled={currentPly === 0}
           title="Previous Move (←)"
+          aria-label="Previous move (Left arrow)"
           style={{
             padding: '8px 10px',
             backgroundColor: 'rgba(30, 41, 59, 0.8)',
@@ -115,12 +124,14 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
             cursor: currentPly === 0 ? 'default' : 'pointer',
           }}
         >
-          <ChevronLeft size={18} />
+          <ChevronLeft size={18} aria-hidden="true" />
         </button>
 
         <button
+          type="button"
           onClick={() => setIsPlaying((p) => !p)}
           title="Play / Pause (Space)"
+          aria-label={isPlaying ? 'Pause autoplay (Space)' : 'Start autoplay (Space)'}
           style={{
             padding: '8px 14px',
             background: isPlaying
@@ -135,13 +146,15 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
               : '0 0 12px rgba(37, 99, 235, 0.4)',
           }}
         >
-          {isPlaying ? <Pause size={18} /> : <Play size={18} fill="#ffffff" />}
+          {isPlaying ? <Pause size={18} aria-hidden="true" /> : <Play size={18} fill="#ffffff" aria-hidden="true" />}
         </button>
 
         <button
+          type="button"
           onClick={onNext}
           disabled={currentPly >= totalPlies}
           title="Next Move (→)"
+          aria-label="Next move (Right arrow)"
           style={{
             padding: '8px 10px',
             backgroundColor: 'rgba(30, 41, 59, 0.8)',
@@ -151,13 +164,15 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
             cursor: currentPly >= totalPlies ? 'default' : 'pointer',
           }}
         >
-          <ChevronRight size={18} />
+          <ChevronRight size={18} aria-hidden="true" />
         </button>
 
         <button
+          type="button"
           onClick={onLast}
           disabled={currentPly >= totalPlies}
           title="Last Move (End)"
+          aria-label="Last move (End)"
           style={{
             padding: '8px 10px',
             backgroundColor: 'rgba(30, 41, 59, 0.8)',
@@ -167,12 +182,13 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
             cursor: currentPly >= totalPlies ? 'default' : 'pointer',
           }}
         >
-          <ChevronLast size={18} />
+          <ChevronLast size={18} aria-hidden="true" />
         </button>
       </div>
 
       {/* Move Info Pill */}
       <div
+        className="tabular-nums"
         style={{
           display: 'flex',
           alignItems: 'center',

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChessComClient, ChessComGameSummary } from '../../integrations/chesscom/ChessComClient';
 import { FEATURED_GAMES, FeaturedGame } from '../../integrations/chesscom/GameResolver';
 import { X, Search, FileText, Globe, Star, ArrowRight, Loader2 } from 'lucide-react';
@@ -24,6 +24,17 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [fetchedGames, setFetchedGames] = useState<ChessComGameSummary[]>([]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleFetchUserGames = async () => {
@@ -33,7 +44,7 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
     try {
       const games = await ChessComClient.getRecentGames(username.trim(), 15);
       if (games.length === 0) {
-        setError(`No recent games found for "${username}".`);
+        setError(`No recent games found for “${username}”.`);
       }
       setFetchedGames(games);
     } catch (err: any) {
@@ -64,6 +75,12 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="import-modal-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       style={{
         position: 'fixed',
         inset: 0,
@@ -105,9 +122,13 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
             borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
           }}
         >
-          <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>Import Chess Game</h2>
+          <h2 id="import-modal-title" className="text-balance" style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>
+            Import Chess Game
+          </h2>
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Close import dialog"
             style={{
               background: 'none',
               border: 'none',
@@ -116,12 +137,14 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
               padding: '4px',
             }}
           >
-            <X size={20} />
+            <X size={20} aria-hidden="true" />
           </button>
         </div>
 
         {/* Tab Selector */}
         <div
+          role="tablist"
+          aria-label="Game import sources"
           style={{
             display: 'flex',
             borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
@@ -139,6 +162,11 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
             return (
               <button
                 key={t.id}
+                type="button"
+                role="tab"
+                id={`tab-${t.id}`}
+                aria-selected={active}
+                aria-controls={`tabpanel-${t.id}`}
                 onClick={() => {
                   setTab(t.id);
                   setError(null);
@@ -157,10 +185,10 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
                   fontSize: '13px',
                   fontWeight: 600,
                   cursor: 'pointer',
-                  transition: 'background-color 0.15s',
+                  transition: 'background-color 0.15s ease, color 0.15s ease',
                 }}
               >
-                <Icon size={16} />
+                <Icon size={16} aria-hidden="true" />
                 <span>{t.label}</span>
               </button>
             );
@@ -169,6 +197,9 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
 
         {/* Tab Body */}
         <div
+          role="tabpanel"
+          id={`tabpanel-${tab}`}
+          aria-labelledby={`tab-${tab}`}
           style={{
             padding: '20px',
             overflowY: 'auto',
@@ -179,6 +210,8 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
         >
           {error && (
             <div
+              role="alert"
+              aria-live="polite"
               style={{
                 padding: '10px 14px',
                 backgroundColor: 'rgba(239, 68, 68, 0.15)',
@@ -200,8 +233,10 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
               </div>
 
               {FEATURED_GAMES.map((fg) => (
-                <div
+                <button
                   key={fg.title}
+                  type="button"
+                  aria-label={`Load featured game: ${fg.title} (${fg.year})`}
                   onClick={() => handleFeaturedSelect(fg)}
                   style={{
                     display: 'flex',
@@ -212,12 +247,14 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
                     borderRadius: '8px',
                     border: '1px solid rgba(255, 255, 255, 0.06)',
                     cursor: 'pointer',
-                    transition: 'border-color 0.15s, transform 0.1s',
+                    textAlign: 'left',
+                    width: '100%',
+                    transition: 'border-color 0.15s ease, transform 0.1s ease',
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#38bdf8')}
                   onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)')}
                 >
-                  <div>
+                  <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: '15px', fontWeight: 700, color: '#f8fafc' }}>
                       {fg.title} ({fg.year})
                     </div>
@@ -228,8 +265,8 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
                       {fg.description}
                     </div>
                   </div>
-                  <ArrowRight size={18} color="#94a3b8" />
-                </div>
+                  <ArrowRight size={18} color="#94a3b8" aria-hidden="true" style={{ flexShrink: 0, marginLeft: '12px' }} />
+                </button>
               ))}
             </div>
           )}
@@ -237,12 +274,19 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
           {/* CHESS.COM USERNAME TAB */}
           {tab === 'username' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <label htmlFor="import-username" className="sr-only">
+                Chess.com Username
+              </label>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <input
+                  id="import-username"
+                  name="username"
                   type="text"
+                  autoComplete="username"
+                  spellCheck={false}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter Chess.com username (e.g. hikaru, magnuscarlsen)"
+                  placeholder="Enter Chess.com username (e.g. hikaru, magnuscarlsen)…"
                   onKeyDown={(e) => e.key === 'Enter' && handleFetchUserGames()}
                   style={{
                     flex: 1,
@@ -253,10 +297,11 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
                     color: '#ffffff',
                     fontSize: '13px',
                     fontFamily: "'Inter', sans-serif",
-                    outline: 'none',
                   }}
                 />
                 <button
+                  type="button"
+                  aria-label="Fetch games from Chess.com archives"
                   onClick={handleFetchUserGames}
                   disabled={isLoading}
                   style={{
@@ -272,9 +317,10 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
                     fontWeight: 600,
                     cursor: 'pointer',
                     opacity: isLoading ? 0.7 : 1,
+                    transition: 'background-color 0.15s ease',
                   }}
                 >
-                  {isLoading ? <Loader2 size={16} className="spin" /> : <Search size={16} />}
+                  {isLoading ? <Loader2 size={16} className="spin" aria-hidden="true" /> : <Search size={16} aria-hidden="true" />}
                   Fetch Games
                 </button>
               </div>
@@ -285,8 +331,10 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
                     Recent games from public archives:
                   </div>
                   {fetchedGames.map((g) => (
-                    <div
+                    <button
                       key={g.id}
+                      type="button"
+                      aria-label={`Select game ${g.white.username} versus ${g.black.username}`}
                       onClick={() => handleChessComGameSelect(g)}
                       style={{
                         display: 'flex',
@@ -297,34 +345,36 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
                         borderRadius: '6px',
                         border: '1px solid rgba(255, 255, 255, 0.06)',
                         cursor: 'pointer',
-                        transition: 'border-color 0.15s',
+                        textAlign: 'left',
+                        width: '100%',
+                        transition: 'border-color 0.15s ease',
                       }}
                       onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#10b981')}
                       onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)')}
                     >
-                      <div>
-                        <div style={{ fontSize: '13px', fontWeight: 700 }}>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#f8fafc' }}>
                           {g.white.username} ({g.white.rating}) vs {g.black.username} ({g.black.rating})
                         </div>
-                        <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
+                        <div className="tabular-nums" style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
                           {g.date} • {g.timeControl} • {g.white.result === 'win' ? '1-0' : g.black.result === 'win' ? '0-1' : '1/2-1/2'}
                         </div>
                       </div>
-                      <button
+                      <span
                         style={{
                           padding: '4px 10px',
                           backgroundColor: '#2563eb',
-                          border: 'none',
                           borderRadius: '4px',
                           color: '#ffffff',
                           fontSize: '11px',
                           fontWeight: 600,
-                          cursor: 'pointer',
+                          flexShrink: 0,
+                          marginLeft: '12px',
                         }}
                       >
                         Analyze
-                      </button>
-                    </div>
+                      </span>
+                    </button>
                   ))}
                 </div>
               )}
@@ -334,10 +384,17 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
           {/* PASTE PGN TAB */}
           {tab === 'pgn' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <label htmlFor="import-pgn" className="sr-only">
+                PGN Content
+              </label>
               <textarea
+                id="import-pgn"
+                name="pgn"
+                autoComplete="off"
+                spellCheck={false}
                 value={pgnInput}
                 onChange={(e) => setPgnInput(e.target.value)}
-                placeholder="Paste your PGN here (e.g. 1. e4 e5 2. Nf3 Nc6 3. Bb5...)"
+                placeholder="Paste your PGN here (e.g. 1. e4 e5 2. Nf3 Nc6 3. Bb5…)…"
                 rows={8}
                 style={{
                   width: '100%',
@@ -348,11 +405,11 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
                   color: '#ffffff',
                   fontSize: '12px',
                   fontFamily: "'JetBrains Mono', monospace",
-                  outline: 'none',
                   resize: 'vertical',
                 }}
               />
               <button
+                type="button"
                 onClick={handleLoadPgnSubmit}
                 style={{
                   padding: '10px 18px',
@@ -364,6 +421,7 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
                   fontWeight: 600,
                   cursor: 'pointer',
                   alignSelf: 'flex-end',
+                  transition: 'background-color 0.15s ease',
                 }}
               >
                 Load Game
@@ -374,14 +432,21 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
           {/* CHESS.COM URL TAB */}
           {tab === 'url' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <label htmlFor="import-url" className="sr-only">
+                Chess.com Game URL
+              </label>
               <div style={{ fontSize: '13px', color: '#94a3b8' }}>
                 Enter a Chess.com live or daily game URL:
               </div>
               <input
-                type="text"
+                id="import-url"
+                name="gameUrl"
+                type="url"
+                autoComplete="off"
+                spellCheck={false}
                 value={gameUrl}
                 onChange={(e) => setGameUrl(e.target.value)}
-                placeholder="https://www.chess.com/game/live/123456789"
+                placeholder="https://www.chess.com/game/live/123456789…"
                 style={{
                   width: '100%',
                   padding: '10px 14px',
@@ -391,11 +456,10 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
                   color: '#ffffff',
                   fontSize: '13px',
                   fontFamily: "'Inter', sans-serif",
-                  outline: 'none',
                 }}
               />
               <div style={{ fontSize: '12px', color: '#64748b' }}>
-                Note: Chess.com public API provides games via monthly player archives. If you know either player's username, enter it in the Username tab for instant 1-click loading.
+                Note: Chess.com public API provides games via monthly player archives. If you know either player’s username, enter it in the Username tab for instant 1-click loading.
               </div>
             </div>
           )}

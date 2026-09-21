@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChessGame, MoveAnalysis } from '../../chess/types';
 import { exportAnnotatedPgn } from '../../chess/PgnParser';
 import { X, Copy, Check, FileText, Code } from 'lucide-react';
@@ -19,6 +19,17 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   onClose,
 }) => {
   const [copiedType, setCopiedType] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -42,6 +53,12 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="export-modal-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       style={{
         position: 'fixed',
         inset: 0,
@@ -82,9 +99,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
           }}
         >
-          <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>Export Analysis</h2>
+          <h2 id="export-modal-title" className="text-balance" style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>
+            Export Analysis
+          </h2>
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Close export modal"
             style={{
               background: 'none',
               border: 'none',
@@ -93,7 +114,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               padding: '4px',
             }}
           >
-            <X size={20} />
+            <X size={20} aria-hidden="true" />
           </button>
         </div>
 
@@ -113,7 +134,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           >
             <div>
               <div style={{ fontSize: '14px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FileText size={16} color="#10b981" />
+                <FileText size={16} color="#10b981" aria-hidden="true" />
                 Annotated PGN
               </div>
               <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
@@ -121,6 +142,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               </div>
             </div>
             <button
+              type="button"
+              aria-live="polite"
+              aria-label="Copy annotated PGN to clipboard"
               onClick={() => copyToClipboard(annotatedPgn, 'annotated')}
               style={{
                 display: 'flex',
@@ -134,9 +158,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 fontSize: '12px',
                 fontWeight: 600,
                 cursor: 'pointer',
+                transition: 'background-color 0.15s ease',
               }}
             >
-              {copiedType === 'annotated' ? <Check size={14} /> : <Copy size={14} />}
+              {copiedType === 'annotated' ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
               {copiedType === 'annotated' ? 'Copied' : 'Copy'}
             </button>
           </div>
@@ -155,7 +180,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           >
             <div>
               <div style={{ fontSize: '14px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FileText size={16} color="#38bdf8" />
+                <FileText size={16} color="#38bdf8" aria-hidden="true" />
                 Raw PGN
               </div>
               <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
@@ -163,6 +188,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               </div>
             </div>
             <button
+              type="button"
+              aria-live="polite"
+              aria-label="Copy raw PGN to clipboard"
               onClick={() => copyToClipboard(game.pgn, 'raw')}
               style={{
                 display: 'flex',
@@ -176,9 +204,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 fontSize: '12px',
                 fontWeight: 600,
                 cursor: 'pointer',
+                transition: 'background-color 0.15s ease',
               }}
             >
-              {copiedType === 'raw' ? <Check size={14} /> : <Copy size={14} />}
+              {copiedType === 'raw' ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
               {copiedType === 'raw' ? 'Copied' : 'Copy'}
             </button>
           </div>
@@ -197,7 +226,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           >
             <div>
               <div style={{ fontSize: '14px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Code size={16} color="#a855f7" />
+                <Code size={16} color="#a855f7" aria-hidden="true" />
                 JSON Analysis Dump
               </div>
               <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
@@ -205,6 +234,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               </div>
             </div>
             <button
+              type="button"
+              aria-live="polite"
+              aria-label="Copy JSON analysis to clipboard"
               onClick={() => copyToClipboard(jsonExport, 'json')}
               style={{
                 display: 'flex',
@@ -218,9 +250,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 fontSize: '12px',
                 fontWeight: 600,
                 cursor: 'pointer',
+                transition: 'background-color 0.15s ease',
               }}
             >
-              {copiedType === 'json' ? <Check size={14} /> : <Copy size={14} />}
+              {copiedType === 'json' ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
               {copiedType === 'json' ? 'Copied' : 'Copy'}
             </button>
           </div>
@@ -240,6 +273,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             <div style={{ maxWidth: '75%', overflow: 'hidden' }}>
               <div style={{ fontSize: '14px', fontWeight: 700 }}>Current FEN</div>
               <div
+                className="tabular-nums"
                 style={{
                   fontSize: '11px',
                   fontFamily: "'JetBrains Mono', monospace",
@@ -254,6 +288,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               </div>
             </div>
             <button
+              type="button"
+              aria-live="polite"
+              aria-label="Copy current FEN to clipboard"
               onClick={() => copyToClipboard(currentFen, 'fen')}
               style={{
                 display: 'flex',
@@ -267,9 +304,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 fontSize: '12px',
                 fontWeight: 600,
                 cursor: 'pointer',
+                transition: 'background-color 0.15s ease',
               }}
             >
-              {copiedType === 'fen' ? <Check size={14} /> : <Copy size={14} />}
+              {copiedType === 'fen' ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
               {copiedType === 'fen' ? 'Copied' : 'Copy'}
             </button>
           </div>

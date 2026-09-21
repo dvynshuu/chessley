@@ -243,15 +243,38 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
       >
         <canvas
           ref={canvasRef}
+          tabIndex={0}
+          role="slider"
+          aria-label="Evaluation flow chart"
+          aria-valuemin={0}
+          aria-valuemax={totalPlies}
+          aria-valuenow={currentPly}
+          aria-valuetext={currentPly === 0 ? 'Start position' : `Ply ${currentPly}`}
           style={{ width: '100%', height: '100%', display: 'block' }}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
           onClick={handleClick}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowLeft') {
+              e.preventDefault();
+              onSelectPly(Math.max(0, currentPly - 1));
+            } else if (e.key === 'ArrowRight') {
+              e.preventDefault();
+              onSelectPly(Math.min(totalPlies, currentPly + 1));
+            } else if (e.key === 'Home') {
+              e.preventDefault();
+              onSelectPly(0);
+            } else if (e.key === 'End') {
+              e.preventDefault();
+              onSelectPly(totalPlies);
+            }
+          }}
         />
 
         {/* Floating Glass Hover Tooltip */}
         {hoverPly !== null && (
           <div
+            className="tabular-nums"
             style={{
               position: 'absolute',
               top: '6px',
@@ -280,7 +303,7 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
               <>
                 <span style={{ color: '#94a3b8' }}>
                   {Math.floor((hoverPly - 1) / 2) + 1}
-                  {hoverPly % 2 === 1 ? '.' : '...'}
+                  {hoverPly % 2 === 1 ? '.' : '…'}
                 </span>
                 {hoverAnalysis && (
                   <span style={{ color: '#ffffff', fontWeight: 800 }}>{hoverAnalysis.san}</span>

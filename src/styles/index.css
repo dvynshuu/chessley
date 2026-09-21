@@ -68,8 +68,70 @@ button:active {
   transform: scale(0.97);
 }
 
+/* Focus Ring System (Vercel Guidelines: visible focus, :focus-visible over :focus) */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+[role="slider"]:focus-visible,
+[tabindex="0"]:focus-visible {
+  outline: 2px solid #38bdf8 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.6) !important;
+}
+
 input, textarea {
   font-family: inherit;
+}
+
+/* Accessibility & Typography Utilities */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only:focus-visible {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: auto;
+  height: auto;
+  padding: 8px 16px;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  background-color: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
+  border-radius: 6px;
+  z-index: 100;
+  box-shadow: 0 0 15px rgba(37, 99, 235, 0.8);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.virtual-row {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 32px;
 }
 
 /* Custom Satin Scrollbar */
@@ -162,5 +224,19 @@ input, textarea {
 
 .chessboard-piece:hover {
   transform: scale(1.05);
+}
+
+/* Motion Preferences (WCAG / Vercel Guidelines Compliance) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .spin {
+    animation: none !important;
+  }
 }
 

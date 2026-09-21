@@ -92,7 +92,9 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         {analysisStatus === 'idle' && (
           <button
+            type="button"
             onClick={onStartAnalysis}
+            aria-label="Analyze entire chess game"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -106,18 +108,23 @@ export const Navbar: React.FC<NavbarProps> = ({
               fontWeight: 700,
               cursor: 'pointer',
               boxShadow: '0 0 16px rgba(16, 185, 129, 0.4)',
-              transition: 'all 0.15s ease',
+              transition: 'background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease',
             }}
           >
-            <Play size={15} fill="#ffffff" />
+            <Play size={15} fill="#ffffff" aria-hidden="true" />
             Analyze Game
           </button>
         )}
 
         {analysisStatus === 'analyzing' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div
+            style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+            aria-live="polite"
+          >
             <button
+              type="button"
               onClick={onPauseAnalysis}
+              aria-label={`Pause analysis at ${progressPercent}%`}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -131,12 +138,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                 fontWeight: 600,
                 cursor: 'pointer',
                 backdropFilter: 'blur(8px)',
+                transition: 'background-color 0.15s ease, border-color 0.15s ease',
               }}
             >
-              <Pause size={14} />
+              <Pause size={14} aria-hidden="true" />
               Pause ({progressPercent}%)
             </button>
             <div
+              role="progressbar"
+              aria-valuenow={progressPercent}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Analysis progress"
               style={{
                 width: '90px',
                 height: '7px',
@@ -161,7 +174,9 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {analysisStatus === 'paused' && (
           <button
+            type="button"
             onClick={onResumeAnalysis}
+            aria-label="Resume game analysis"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -175,16 +190,19 @@ export const Navbar: React.FC<NavbarProps> = ({
               fontWeight: 700,
               cursor: 'pointer',
               boxShadow: '0 0 16px rgba(245, 158, 11, 0.4)',
+              transition: 'background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease',
             }}
           >
-            <Play size={14} fill="#ffffff" />
+            <Play size={14} fill="#ffffff" aria-hidden="true" />
             Resume
           </button>
         )}
 
         {analysisStatus === 'complete' && (
           <button
+            type="button"
             onClick={onOpenSummary}
+            aria-label="Review completed game analysis summary"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -199,16 +217,19 @@ export const Navbar: React.FC<NavbarProps> = ({
               cursor: 'pointer',
               boxShadow: '0 0 14px rgba(16, 185, 129, 0.25)',
               backdropFilter: 'blur(8px)',
+              transition: 'background-color 0.15s ease, border-color 0.15s ease',
             }}
           >
-            <CheckCircle size={15} />
+            <CheckCircle size={15} aria-hidden="true" />
             Review Summary
           </button>
         )}
 
         {hasAnalyses && analysisStatus !== 'complete' && (
           <button
+            type="button"
             onClick={onOpenSummary}
+            aria-label="View game summary"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -223,9 +244,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               cursor: 'pointer',
               boxShadow: '0 0 10px rgba(56, 189, 248, 0.15)',
               backdropFilter: 'blur(8px)',
+              transition: 'background-color 0.15s ease, border-color 0.15s ease',
             }}
           >
-            <Award size={15} color="#38bdf8" />
+            <Award size={15} color="#38bdf8" aria-hidden="true" />
             Summary
           </button>
         )}
@@ -234,7 +256,9 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Right Controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <button
+          type="button"
           onClick={onOpenImport}
+          aria-label="Import game from Chess.com or PGN"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -248,16 +272,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             fontWeight: 600,
             cursor: 'pointer',
             boxShadow: '0 0 16px rgba(37, 99, 235, 0.4)',
-            transition: 'all 0.15s ease',
+            transition: 'background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease',
           }}
         >
-          <Upload size={15} />
+          <Upload size={15} aria-hidden="true" />
           Import
         </button>
 
         <button
+          type="button"
           onClick={onOpenExport}
           title="Export Analysis"
+          aria-label="Export analysis"
           style={{
             padding: '8px',
             backgroundColor: 'rgba(255, 255, 255, 0.04)',
@@ -265,7 +291,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             borderRadius: '8px',
             color: '#94a3b8',
             cursor: 'pointer',
-            transition: 'all 0.15s ease',
+            transition: 'background-color 0.15s ease, color 0.15s ease',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -279,12 +305,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             e.currentTarget.style.color = '#94a3b8';
           }}
         >
-          <Download size={16} />
+          <Download size={16} aria-hidden="true" />
         </button>
 
         <button
+          type="button"
           onClick={onFlipBoard}
           title="Flip Board"
+          aria-label="Flip board orientation"
           style={{
             padding: '8px',
             backgroundColor: 'rgba(255, 255, 255, 0.04)',
@@ -292,7 +320,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             borderRadius: '8px',
             color: '#94a3b8',
             cursor: 'pointer',
-            transition: 'all 0.15s ease',
+            transition: 'background-color 0.15s ease, color 0.15s ease',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -306,12 +334,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             e.currentTarget.style.color = '#94a3b8';
           }}
         >
-          <RotateCcw size={16} />
+          <RotateCcw size={16} aria-hidden="true" />
         </button>
 
         <button
+          type="button"
           onClick={onOpenSettings}
           title="Settings"
+          aria-label="Open settings and engine configurations"
           style={{
             padding: '8px',
             backgroundColor: 'rgba(255, 255, 255, 0.04)',
@@ -319,7 +349,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             borderRadius: '8px',
             color: '#94a3b8',
             cursor: 'pointer',
-            transition: 'all 0.15s ease',
+            transition: 'background-color 0.15s ease, color 0.15s ease',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -333,7 +363,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             e.currentTarget.style.color = '#94a3b8';
           }}
         >
-          <Settings size={16} />
+          <Settings size={16} aria-hidden="true" />
         </button>
       </div>
     </header>

@@ -14,7 +14,7 @@ export const PieceSvg: React.FC<PieceProps> = ({ piece, color, className = '' })
   switch (p) {
     case 'p':
       return (
-        <svg viewBox="0 0 45 45" className={className} fill="none">
+        <svg viewBox="0 0 45 45" className={className} fill="none" aria-hidden="true">
           <path
             d="m 22.5,9 c -2.21,0 -4,1.79 -4,4 0,0.89 0.29,1.71 0.78,2.38 C 17.33,16.5 16,18.59 16,21 c 0,2.03 0.94,3.84 2.41,5.03 C 15.41,27.09 11,31.58 11,39.5 l 23,0 c 0,-7.92 -4.41,-12.41 -7.41,-13.47 C 28.06,24.84 29,23.03 29,21 29,18.59 27.67,16.5 25.72,15.38 26.21,14.71 26.5,13.89 26.5,13 c 0,-2.21 -1.79,-4 -4,-4 z"
             fill={isWhite ? '#ffffff' : '#1e293b'}
@@ -28,7 +28,7 @@ export const PieceSvg: React.FC<PieceProps> = ({ piece, color, className = '' })
 
     case 'n':
       return (
-        <svg viewBox="0 0 45 45" className={className} fill="none">
+        <svg viewBox="0 0 45 45" className={className} fill="none" aria-hidden="true">
           <path
             d="m 22,10 c 10.5,1 16.5,8 16,29 L 15,39 C 15,30 9.65,22.37 9,19 c 3,-0.5 6,0 6,0 0,0 2,-4 5,-4 1.5,0 3,1 3,1 0,0 0.5,-1.5 2,-2 1.5,-0.5 4,0 4,0 z"
             fill={isWhite ? '#ffffff' : '#1e293b'}
@@ -49,7 +49,7 @@ export const PieceSvg: React.FC<PieceProps> = ({ piece, color, className = '' })
 
     case 'b':
       return (
-        <svg viewBox="0 0 45 45" className={className} fill="none">
+        <svg viewBox="0 0 45 45" className={className} fill="none" aria-hidden="true">
           <g
             fill={isWhite ? '#ffffff' : '#1e293b'}
             stroke={isWhite ? '#0f172a' : '#0f172a'}
@@ -67,7 +67,7 @@ export const PieceSvg: React.FC<PieceProps> = ({ piece, color, className = '' })
 
     case 'r':
       return (
-        <svg viewBox="0 0 45 45" className={className} fill="none">
+        <svg viewBox="0 0 45 45" className={className} fill="none" aria-hidden="true">
           <g
             fill={isWhite ? '#ffffff' : '#1e293b'}
             stroke={isWhite ? '#0f172a' : '#0f172a'}
@@ -88,7 +88,7 @@ export const PieceSvg: React.FC<PieceProps> = ({ piece, color, className = '' })
 
     case 'q':
       return (
-        <svg viewBox="0 0 45 45" className={className} fill="none">
+        <svg viewBox="0 0 45 45" className={className} fill="none" aria-hidden="true">
           <g
             fill={isWhite ? '#ffffff' : '#1e293b'}
             stroke={isWhite ? '#0f172a' : '#0f172a'}
@@ -111,7 +111,7 @@ export const PieceSvg: React.FC<PieceProps> = ({ piece, color, className = '' })
 
     case 'k':
       return (
-        <svg viewBox="0 0 45 45" className={className} fill="none">
+        <svg viewBox="0 0 45 45" className={className} fill="none" aria-hidden="true">
           <g
             fill={isWhite ? '#ffffff' : '#1e293b'}
             stroke={isWhite ? '#0f172a' : '#0f172a'}
