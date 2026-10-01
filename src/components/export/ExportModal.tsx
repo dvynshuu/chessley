@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { X, Copy, Check, FileText, Code } from 'lucide-react';
 import { ChessGame, MoveAnalysis } from '../../chess/types';
 import { exportAnnotatedPgn } from '../../chess/PgnParser';
-import { X, Copy, Check, FileText, Code } from 'lucide-react';
 
 interface ExportModalProps {
   game: ChessGame;
@@ -20,36 +20,16 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 }) => {
   const [copiedType, setCopiedType] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
-
   if (!isOpen) return null;
+
+  const annotatedPgn = exportAnnotatedPgn(game, analyses);
+  const jsonExport = JSON.stringify({ game, analyses, exportedAt: new Date().toISOString() }, null, 2);
 
   const copyToClipboard = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
     setCopiedType(type);
     setTimeout(() => setCopiedType(null), 2000);
   };
-
-  const annotatedPgn = exportAnnotatedPgn(game, analyses);
-  const jsonExport = JSON.stringify(
-    {
-      game,
-      analyses,
-      exportedAt: new Date().toISOString(),
-      engine: 'Stockfish 19 WASM',
-    },
-    null,
-    2
-  );
 
   return (
     <div
@@ -62,9 +42,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(3, 7, 18, 0.75)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
+        backgroundColor: 'rgba(0, 0, 0, 0.75)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -76,17 +54,16 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         style={{
           width: '100%',
           maxWidth: '600px',
-          backgroundColor: 'rgba(15, 23, 42, 0.88)',
-          backdropFilter: 'blur(24px)',
-          WebkitBackdropFilter: 'blur(24px)',
-          borderRadius: '16px',
-          border: '1px solid rgba(255, 255, 255, 0.14)',
+          maxHeight: '90vh',
+          backgroundColor: '#0f121a',
+          borderRadius: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 25px 60px -12px rgba(0, 0, 0, 0.9), 0 0 40px rgba(168, 85, 247, 0.15)',
+          boxShadow: '0 24px 64px -8px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.08)',
           fontFamily: "'Inter', sans-serif",
           color: '#f8fafc',
-          overflow: 'hidden',
+          overflowY: 'auto',
         }}
       >
         {/* Header */}
@@ -99,7 +76,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
           }}
         >
-          <h2 id="export-modal-title" className="text-balance" style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>
+          <h2 id="export-modal-title" className="text-balance" style={{ fontSize: '17px', fontWeight: 800, margin: 0 }}>
             Export Analysis
           </h2>
           <button
@@ -111,15 +88,27 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               border: 'none',
               color: '#94a3b8',
               cursor: 'pointer',
-              padding: '4px',
+              padding: '6px',
+              borderRadius: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#1c2230';
+              e.currentTarget.style.color = '#ffffff';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = '#94a3b8';
             }}
           >
-            <X size={20} aria-hidden="true" />
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
 
         {/* Content Options */}
-        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {/* Annotated PGN */}
           <div
             style={{
@@ -127,9 +116,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '12px 16px',
-              backgroundColor: '#1e293b',
+              backgroundColor: '#151923',
               borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
             }}
           >
             <div>
@@ -152,12 +142,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 gap: '6px',
                 padding: '6px 12px',
                 backgroundColor: copiedType === 'annotated' ? '#10b981' : '#2563eb',
-                border: 'none',
+                border: copiedType === 'annotated' ? '1px solid #10b981' : '1px solid #3b82f6',
                 borderRadius: '6px',
                 color: '#ffffff',
                 fontSize: '12px',
                 fontWeight: 600,
                 cursor: 'pointer',
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
                 transition: 'background-color 0.15s ease',
               }}
             >
@@ -173,14 +164,15 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '12px 16px',
-              backgroundColor: '#1e293b',
+              backgroundColor: '#151923',
               borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
             }}
           >
             <div>
               <div style={{ fontSize: '14px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FileText size={16} color="#38bdf8" aria-hidden="true" />
+                <FileText size={16} color="#c8aa6e" aria-hidden="true" />
                 Raw PGN
               </div>
               <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
@@ -198,12 +190,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 gap: '6px',
                 padding: '6px 12px',
                 backgroundColor: copiedType === 'raw' ? '#10b981' : '#2563eb',
-                border: 'none',
+                border: copiedType === 'raw' ? '1px solid #10b981' : '1px solid #3b82f6',
                 borderRadius: '6px',
                 color: '#ffffff',
                 fontSize: '12px',
                 fontWeight: 600,
                 cursor: 'pointer',
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
                 transition: 'background-color 0.15s ease',
               }}
             >
@@ -219,14 +212,15 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '12px 16px',
-              backgroundColor: '#1e293b',
+              backgroundColor: '#151923',
               borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
             }}
           >
             <div>
               <div style={{ fontSize: '14px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Code size={16} color="#a855f7" aria-hidden="true" />
+                <Code size={16} color="#94a3b8" aria-hidden="true" />
                 JSON Analysis Dump
               </div>
               <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
@@ -244,12 +238,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 gap: '6px',
                 padding: '6px 12px',
                 backgroundColor: copiedType === 'json' ? '#10b981' : '#2563eb',
-                border: 'none',
+                border: copiedType === 'json' ? '1px solid #10b981' : '1px solid #3b82f6',
                 borderRadius: '6px',
                 color: '#ffffff',
                 fontSize: '12px',
                 fontWeight: 600,
                 cursor: 'pointer',
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
                 transition: 'background-color 0.15s ease',
               }}
             >
@@ -265,9 +260,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '12px 16px',
-              backgroundColor: '#1e293b',
+              backgroundColor: '#151923',
               borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
             }}
           >
             <div style={{ maxWidth: '75%', overflow: 'hidden' }}>
@@ -298,12 +294,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 gap: '6px',
                 padding: '6px 12px',
                 backgroundColor: copiedType === 'fen' ? '#10b981' : '#2563eb',
-                border: 'none',
+                border: copiedType === 'fen' ? '1px solid #10b981' : '1px solid #3b82f6',
                 borderRadius: '6px',
                 color: '#ffffff',
                 fontSize: '12px',
                 fontWeight: 600,
                 cursor: 'pointer',
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
                 transition: 'background-color 0.15s ease',
               }}
             >

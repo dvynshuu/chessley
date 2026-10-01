@@ -18,6 +18,8 @@ interface ChessboardProps {
   soundEnabled?: boolean;
   soundVolume?: number;
   onMove?: (from: string, to: string, promotion?: string) => void;
+  onSwipeLeft?: () => void;
+  onSwipeRight?: () => void;
 }
 
 const THEME_COLORS: Record<BoardTheme, { light: string; dark: string; border: string }> = {
@@ -59,9 +61,41 @@ export const Chessboard: React.FC<ChessboardProps> = ({
   soundEnabled = true,
   soundVolume = 0.6,
   onMove,
+  onSwipeLeft,
+  onSwipeRight,
 }) => {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [promotionPending, setPromotionPending] = useState<{ from: string; to: string } | null>(null);
+  const touchStartRef = React.useRef<{ x: number; y: number; time: number } | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        time: Date.now(),
+      };
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+    const dx = endX - touchStartRef.current.x;
+    const dy = endY - touchStartRef.current.y;
+    const dt = Date.now() - touchStartRef.current.time;
+    touchStartRef.current = null;
+
+    // Minimum distance 40px and predominantly horizontal (abs(dx) > abs(dy) * 1.3) within 500ms
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.3 && dt < 500) {
+      if (dx < 0) {
+        onSwipeLeft?.();
+      } else {
+        onSwipeRight?.();
+      }
+    }
+  };
 
   // Parse FEN piece layout
   const { boardLayout, sideToMove, inCheck, checkKingSquare } = useMemo(() => {
@@ -209,6 +243,9 @@ export const Chessboard: React.FC<ChessboardProps> = ({
 
   return (
     <div
+      className="chessboard-container"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       style={{
         position: 'relative',
         width: '100%',
@@ -217,7 +254,7 @@ export const Chessboard: React.FC<ChessboardProps> = ({
         borderRadius: '12px',
         overflow: 'hidden',
         boxShadow:
-          '0 25px 50px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.12), 0 0 35px rgba(124, 58, 237, 0.15)',
+          '0 20px 48px -8px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.12)',
         userSelect: 'none',
         border: `4px solid ${currentTheme.border}`,
       }}
@@ -278,29 +315,28 @@ export const Chessboard: React.FC<ChessboardProps> = ({
                   overflow: 'hidden',
                 }}
               >
-                {/* Subtle Last Move Glow Overlay */}
+                {/* Architectural Last Move Indicator */}
                 {(isLastMoveFrom || isLastMoveTo) && (
                   <div
                     style={{
                       position: 'absolute',
                       inset: 0,
-                      backgroundColor: isLight ? 'rgba(250, 204, 21, 0.35)' : 'rgba(234, 179, 8, 0.42)',
-                      boxShadow: 'inset 0 0 14px rgba(250, 204, 21, 0.3)',
-                      animation: 'lastMovePulse 2.5s infinite ease-in-out',
+                      backgroundColor: isLight ? 'rgba(200, 170, 110, 0.28)' : 'rgba(180, 150, 90, 0.38)',
+                      boxShadow: 'inset 0 0 0 1px rgba(200, 170, 110, 0.45)',
                       pointerEvents: 'none',
                     }}
                   />
                 )}
 
-                {/* Selected Square Neon Ring */}
+                {/* Selected Square Precision Frame */}
                 {isSelected && (
                   <div
                     style={{
                       position: 'absolute',
                       inset: '2px',
-                      borderRadius: '4px',
-                      boxShadow: 'inset 0 0 0 2.5px #38bdf8, 0 0 14px rgba(56, 189, 248, 0.65)',
-                      backgroundColor: 'rgba(56, 189, 248, 0.2)',
+                      borderRadius: '3px',
+                      border: '2px solid #c8aa6e',
+                      backgroundColor: 'rgba(200, 170, 110, 0.2)',
                       pointerEvents: 'none',
                     }}
                   />
@@ -342,13 +378,14 @@ export const Chessboard: React.FC<ChessboardProps> = ({
                   </span>
                 )}
 
-                {/* Check danger glow */}
+                {/* Check warning square */}
                 {isCheckSquare && (
                   <div
                     style={{
                       position: 'absolute',
                       inset: 0,
-                      background: 'radial-gradient(circle, rgba(239, 68, 68, 0.95) 0%, rgba(239, 68, 68, 0.15) 75%)',
+                      backgroundColor: 'rgba(239, 68, 68, 0.45)',
+                      boxShadow: 'inset 0 0 0 2px #ef4444',
                       animation: 'checkPulse 1.5s infinite ease-in-out',
                       pointerEvents: 'none',
                     }}
@@ -359,11 +396,11 @@ export const Chessboard: React.FC<ChessboardProps> = ({
                 {isDestination && !piece && (
                   <div
                     style={{
-                      width: '28%',
-                      height: '28%',
+                      width: '26%',
+                      height: '26%',
                       borderRadius: '50%',
-                      backgroundColor: 'rgba(56, 189, 248, 0.7)',
-                      boxShadow: '0 0 10px rgba(56, 189, 248, 0.8)',
+                      backgroundColor: 'rgba(200, 170, 110, 0.75)',
+                      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.6)',
                       pointerEvents: 'none',
                     }}
                   />
@@ -374,8 +411,8 @@ export const Chessboard: React.FC<ChessboardProps> = ({
                       position: 'absolute',
                       inset: '3px',
                       borderRadius: '50%',
-                      border: '3.5px solid rgba(239, 68, 68, 0.75)',
-                      boxShadow: '0 0 10px rgba(239, 68, 68, 0.5), inset 0 0 8px rgba(239, 68, 68, 0.25)',
+                      border: '3px solid rgba(239, 68, 68, 0.85)',
+                      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.6)',
                       pointerEvents: 'none',
                     }}
                   />
@@ -408,7 +445,6 @@ export const Chessboard: React.FC<ChessboardProps> = ({
             position: 'absolute',
             inset: 0,
             backgroundColor: 'rgba(0, 0, 0, 0.75)',
-            backdropFilter: 'blur(6px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -417,14 +453,13 @@ export const Chessboard: React.FC<ChessboardProps> = ({
         >
           <div
             style={{
-              backgroundColor: 'rgba(30, 41, 59, 0.9)',
-              backdropFilter: 'blur(16px)',
-              borderRadius: '16px',
+              backgroundColor: '#0f121a',
+              borderRadius: '12px',
               padding: '16px',
               display: 'flex',
               gap: '12px',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 30px rgba(124, 58, 237, 0.3)',
-              border: '1px solid rgba(255, 255, 255, 0.16)',
+              boxShadow: '0 24px 60px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.12)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
             }}
           >
             {['q', 'r', 'b', 'n'].map((promoPiece) => {
@@ -441,22 +476,22 @@ export const Chessboard: React.FC<ChessboardProps> = ({
                   style={{
                     width: '60px',
                     height: '60px',
-                    backgroundColor: 'rgba(51, 65, 85, 0.8)',
+                    backgroundColor: '#1c2230',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '10px',
+                    borderRadius: '8px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
+                    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
                     transition: 'background-color 0.15s ease, transform 0.1s ease',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#475569';
-                    e.currentTarget.style.transform = 'translateY(-2px) scale(1.05)';
+                    e.currentTarget.style.backgroundColor = '#252b3d';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(51, 65, 85, 0.8)';
+                    e.currentTarget.style.backgroundColor = '#1c2230';
                     e.currentTarget.style.transform = 'none';
                   }}
                 >

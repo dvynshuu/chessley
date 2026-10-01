@@ -58,9 +58,7 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(3, 7, 18, 0.75)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
+        backgroundColor: 'rgba(0, 0, 0, 0.75)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -73,15 +71,13 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
           width: '100%',
           maxWidth: '680px',
           maxHeight: '90vh',
-          backgroundColor: 'rgba(15, 23, 42, 0.88)',
-          backdropFilter: 'blur(24px)',
-          WebkitBackdropFilter: 'blur(24px)',
-          borderRadius: '16px',
-          border: '1px solid rgba(255, 255, 255, 0.14)',
+          backgroundColor: '#0f121a',
+          borderRadius: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          boxShadow: '0 25px 60px -12px rgba(0, 0, 0, 0.9), 0 0 40px rgba(99, 102, 241, 0.15)',
+          boxShadow: '0 24px 64px -8px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.08)',
           fontFamily: "'Inter', sans-serif",
           color: '#f8fafc',
         }}
@@ -141,10 +137,11 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
             {/* White Accuracy */}
             <div
               style={{
-                backgroundColor: '#1e293b',
+                backgroundColor: '#151923',
                 borderRadius: '8px',
                 padding: '16px',
-                border: '1px solid rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
                 textAlign: 'center',
               }}
             >
@@ -169,10 +166,11 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
             {/* Black Accuracy */}
             <div
               style={{
-                backgroundColor: '#1e293b',
+                backgroundColor: '#151923',
                 borderRadius: '8px',
                 padding: '16px',
-                border: '1px solid rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
                 textAlign: 'center',
               }}
             >
@@ -184,7 +182,7 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
                 style={{
                   fontSize: '36px',
                   fontWeight: 900,
-                  color: '#38bdf8',
+                  color: '#c8aa6e',
                   margin: '8px 0',
                   fontFamily: "'JetBrains Mono', monospace",
                 }}
@@ -387,7 +385,7 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
             gap: '10px',
             padding: '14px 20px',
             borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-            backgroundColor: '#0b1120',
+            backgroundColor: '#090c13',
           }}
         >
           <button
@@ -398,14 +396,21 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
               alignItems: 'center',
               gap: '6px',
               padding: '8px 14px',
-              backgroundColor: '#1e293b',
+              backgroundColor: '#151923',
               border: '1px solid rgba(255, 255, 255, 0.1)',
               borderRadius: '6px',
               color: '#f8fafc',
               fontSize: '13px',
               fontWeight: 600,
               cursor: 'pointer',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
               transition: 'background-color 0.15s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#1c2230';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#151923';
             }}
           >
             <Download size={16} aria-hidden="true" />
@@ -417,13 +422,20 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
             style={{
               padding: '8px 18px',
               backgroundColor: '#2563eb',
-              border: 'none',
+              border: '1px solid #3b82f6',
               borderRadius: '6px',
               color: '#ffffff',
               fontSize: '13px',
               fontWeight: 600,
               cursor: 'pointer',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
               transition: 'background-color 0.15s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#3b82f6';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#2563eb';
             }}
           >
             Close Review

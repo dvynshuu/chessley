@@ -1,9 +1,9 @@
 import React from 'react';
+import { Cpu, Award } from 'lucide-react';
 import { EngineAnalysisResult, EngineInfo, EngineMode } from '../../engine/stockfish/EngineTypes';
 import { MoveAnalysis } from '../../chess/types';
-import { formatScore } from '../../chess/EvaluationUtils';
-import { Cpu, Award } from 'lucide-react';
 import { CLASSIFICATION_META } from '../../chess/Classification';
+import { formatScore } from '../../chess/EvaluationUtils';
 
 interface EnginePanelProps {
   interactiveResult: EngineAnalysisResult | null;
@@ -23,18 +23,16 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
   onSetEngineMode,
 }) => {
   const depth = interactiveInfo?.depth || interactiveResult?.depth || currentMoveAnalysis?.depth || 0;
-  const nodes = interactiveInfo?.nodes || interactiveResult?.nodes || currentMoveAnalysis?.nodes;
-  const nps = interactiveInfo?.nps || interactiveResult?.nps;
+  const nodes = interactiveInfo?.nodes || interactiveResult?.nodes || currentMoveAnalysis?.nodes || 0;
+  const nps = interactiveInfo?.nps || interactiveResult?.nps || 0;
   const pv = interactiveInfo?.pv || interactiveResult?.principalVariation || currentMoveAnalysis?.principalVariation || [];
-
   const score = interactiveResult?.normalizedScore || currentMoveAnalysis?.playedScoreAfter || { type: 'cp', value: 0 };
-  const bestMove = interactiveResult?.bestMove || currentMoveAnalysis?.bestMove || (pv[0] ?? '');
+  const bestMove = interactiveResult?.bestMove || currentMoveAnalysis?.bestMove || (pv.length > 0 ? pv[0] : null);
 
-  const formatNodes = (num?: number) => {
-    if (!num) return '—';
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(0)}k`;
-    return String(num);
+  const formatNodes = (val: number) => {
+    if (val >= 1_000_000) return `${(val / 1_000_000).toFixed(1)}M`;
+    if (val >= 1_000) return `${(val / 1_000).toFixed(0)}k`;
+    return `${val}`;
   };
 
   return (
@@ -43,12 +41,10 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
         display: 'flex',
         flexDirection: 'column',
         gap: '14px',
-        backgroundColor: 'rgba(15, 23, 42, 0.72)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderRadius: '10px',
+        backgroundColor: '#0f121a',
+        borderRadius: '8px',
         border: '1px solid rgba(255, 255, 255, 0.08)',
-        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4)',
+        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.4)',
         padding: '16px',
         fontFamily: "'Inter', sans-serif",
       }}
@@ -59,10 +55,12 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '8px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Cpu size={16} color={engineMode === 'max' ? '#a78bfa' : '#38bdf8'} aria-hidden="true" />
+          <Cpu size={16} color={engineMode === 'max' ? '#c8aa6e' : '#94a3b8'} aria-hidden="true" />
           <span style={{ fontSize: '13px', fontWeight: 700, color: '#f8fafc', letterSpacing: '-0.2px' }}>
             Stockfish 19 {engineMode === 'max' ? 'Max Level' : 'WASM'}
           </span>
@@ -73,9 +71,9 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
                 fontWeight: 800,
                 padding: '1px 5px',
                 borderRadius: '4px',
-                backgroundColor: 'rgba(124, 58, 237, 0.25)',
-                color: '#c4b5fd',
-                border: '1px solid rgba(167, 139, 250, 0.4)',
+                backgroundColor: 'rgba(200, 170, 110, 0.15)',
+                color: '#c8aa6e',
+                border: '1px solid rgba(200, 170, 110, 0.35)',
               }}
             >
               LVL 20
@@ -99,7 +97,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
                   height: '6px',
                   borderRadius: '50%',
                   backgroundColor: '#10b981',
-                  animation: 'pulse 1s infinite',
+                  animation: 'pulse 1.2s infinite',
                 }}
               />
               Evaluating…
@@ -108,35 +106,41 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
         </div>
 
         {/* Preset Selector */}
-        <div style={{ display: 'flex', gap: '4px', backgroundColor: '#1e293b', padding: '2px', borderRadius: '6px' }}>
-          {(['fast', 'balanced', 'deep', 'max'] as EngineMode[]).map((mode) => (
-            <button
-              key={mode}
-              type="button"
-              aria-pressed={engineMode === mode}
-              onClick={() => onSetEngineMode(mode)}
-              style={{
-                padding: '3px 8px',
-                fontSize: '11px',
-                fontWeight: 600,
-                border: 'none',
-                borderRadius: '4px',
-                backgroundColor:
-                  engineMode === mode
+        <div style={{ display: 'flex', gap: '3px', backgroundColor: '#090c13', padding: '3px', borderRadius: '6px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+          {(['fast', 'balanced', 'deep', 'max'] as EngineMode[]).map((mode) => {
+            const isActive = engineMode === mode;
+            return (
+              <button
+                key={mode}
+                type="button"
+                aria-pressed={isActive}
+                onClick={() => onSetEngineMode(mode)}
+                style={{
+                  padding: '3px 8px',
+                  fontSize: '11px',
+                  fontWeight: isActive ? 700 : 500,
+                  border: 'none',
+                  borderRadius: '4px',
+                  backgroundColor: isActive
                     ? mode === 'max'
-                      ? '#7c3aed'
+                      ? '#c8aa6e'
                       : '#2563eb'
                     : 'transparent',
-                color: engineMode === mode ? '#ffffff' : '#94a3b8',
-                cursor: 'pointer',
-                textTransform: 'capitalize',
-                transition: 'background-color 0.1s ease, color 0.1s ease',
-                boxShadow: engineMode === mode && mode === 'max' ? '0 0 8px rgba(124, 58, 237, 0.4)' : 'none',
-              }}
-            >
-              {mode === 'max' ? '★ Max' : mode}
-            </button>
-          ))}
+                  color: isActive
+                    ? mode === 'max'
+                      ? '#080a0f'
+                      : '#ffffff'
+                    : '#94a3b8',
+                  cursor: 'pointer',
+                  textTransform: 'capitalize',
+                  transition: 'background-color 0.1s ease, color 0.1s ease',
+                  boxShadow: isActive ? '0 1px 2px rgba(0, 0, 0, 0.3)' : 'none',
+                }}
+              >
+                {mode === 'max' ? '★ Max' : mode}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -150,12 +154,11 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
       >
         <div
           style={{
-            backgroundColor: 'rgba(30, 41, 59, 0.65)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: '8px',
+            backgroundColor: '#151923',
+            borderRadius: '6px',
             padding: '10px 12px',
             border: '1px solid rgba(255, 255, 255, 0.08)',
-            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.04)',
           }}
         >
           <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginBottom: '4px' }}>
@@ -176,12 +179,11 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
 
         <div
           style={{
-            backgroundColor: 'rgba(30, 41, 59, 0.65)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: '8px',
+            backgroundColor: '#151923',
+            borderRadius: '6px',
             padding: '10px 12px',
             border: '1px solid rgba(255, 255, 255, 0.08)',
-            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.04)',
           }}
         >
           <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginBottom: '4px' }}>
@@ -193,7 +195,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
               fontSize: '17px',
               fontWeight: 800,
               fontFamily: "'JetBrains Mono', monospace",
-              color: depth >= 24 ? '#c4b5fd' : '#38bdf8',
+              color: depth >= 24 ? '#c8aa6e' : '#f8fafc',
             }}
           >
             {depth > 0 ? depth : '—'}
@@ -202,12 +204,11 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
 
         <div
           style={{
-            backgroundColor: 'rgba(30, 41, 59, 0.65)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: '8px',
+            backgroundColor: '#151923',
+            borderRadius: '6px',
             padding: '10px 12px',
             border: '1px solid rgba(255, 255, 255, 0.08)',
-            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.04)',
           }}
         >
           <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginBottom: '4px' }}>
@@ -235,11 +236,11 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            backgroundColor: CLASSIFICATION_META[currentMoveAnalysis.classification]?.bgColor || 'rgba(30, 41, 59, 0.7)',
-            border: `1px solid ${CLASSIFICATION_META[currentMoveAnalysis.classification]?.color || 'transparent'}`,
-            borderRadius: '8px',
+            backgroundColor: CLASSIFICATION_META[currentMoveAnalysis.classification]?.bgColor || '#151923',
+            border: `1px solid ${CLASSIFICATION_META[currentMoveAnalysis.classification]?.color || 'rgba(255, 255, 255, 0.1)'}`,
+            borderRadius: '6px',
             padding: '10px 14px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.35)',
+            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -275,11 +276,11 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
       {/* Best Move & Principal Variation (PV) */}
       <div
         style={{
-          backgroundColor: 'rgba(30, 41, 59, 0.65)',
-          backdropFilter: 'blur(10px)',
-          borderRadius: '8px',
+          backgroundColor: '#151923',
+          borderRadius: '6px',
           padding: '12px',
           border: '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
         }}
       >
         <div
@@ -300,7 +301,7 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
                 fontSize: '12px',
                 fontWeight: 800,
                 color: '#10b981',
-                backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                backgroundColor: 'rgba(16, 185, 129, 0.12)',
                 padding: '2px 8px',
                 borderRadius: '4px',
                 border: '1px solid rgba(16, 185, 129, 0.3)',
@@ -331,8 +332,8 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
                   marginBottom: '4px',
                   padding: '2px 6px',
                   borderRadius: '4px',
-                  backgroundColor: idx === 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                  border: idx === 0 ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(255, 255, 255, 0.06)',
+                  backgroundColor: idx === 0 ? 'rgba(16, 185, 129, 0.15)' : '#1c2230',
+                  border: idx === 0 ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
                   color: idx === 0 ? '#34d399' : '#e2e8f0',
                   fontWeight: idx === 0 ? 800 : 500,
                 }}

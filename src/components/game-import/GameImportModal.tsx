@@ -84,9 +84,7 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(3, 7, 18, 0.75)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
+        backgroundColor: 'rgba(0, 0, 0, 0.75)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -99,15 +97,13 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
           width: '100%',
           maxWidth: '680px',
           maxHeight: '90vh',
-          backgroundColor: 'rgba(15, 23, 42, 0.88)',
-          backdropFilter: 'blur(24px)',
-          WebkitBackdropFilter: 'blur(24px)',
-          borderRadius: '16px',
-          border: '1px solid rgba(255, 255, 255, 0.14)',
+          backgroundColor: '#0f121a',
+          borderRadius: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          boxShadow: '0 25px 60px -12px rgba(0, 0, 0, 0.9), 0 0 40px rgba(56, 189, 248, 0.15)',
+          boxShadow: '0 24px 64px -8px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.08)',
           fontFamily: "'Inter', sans-serif",
           color: '#f8fafc',
         }}
@@ -122,7 +118,7 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
             borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
           }}
         >
-          <h2 id="import-modal-title" className="text-balance" style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>
+          <h2 id="import-modal-title" className="text-balance" style={{ fontSize: '17px', fontWeight: 800, margin: 0 }}>
             Import Chess Game
           </h2>
           <button
@@ -134,10 +130,22 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
               border: 'none',
               color: '#94a3b8',
               cursor: 'pointer',
-              padding: '4px',
+              padding: '6px',
+              borderRadius: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#1c2230';
+              e.currentTarget.style.color = '#ffffff';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = '#94a3b8';
             }}
           >
-            <X size={20} aria-hidden="true" />
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
 
@@ -147,13 +155,15 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
           aria-label="Game import sources"
           style={{
             display: 'flex',
+            overflowX: 'auto',
             borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-            backgroundColor: '#0b1120',
+            backgroundColor: '#090c13',
+            scrollbarWidth: 'none',
           }}
         >
           {[
             { id: 'featured' as const, label: 'Featured Games', icon: Star },
-            { id: 'username' as const, label: 'Chess.com Username', icon: Search },
+            { id: 'username' as const, label: 'Chess.com', icon: Search },
             { id: 'pgn' as const, label: 'Paste PGN', icon: FileText },
             { id: 'url' as const, label: 'Game URL', icon: Globe },
           ].map((t) => {
@@ -172,23 +182,24 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
                   setError(null);
                 }}
                 style={{
-                  flex: 1,
+                  flex: '1 0 auto',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '6px',
                   padding: '12px 14px',
-                  backgroundColor: active ? '#0f172a' : 'transparent',
+                  whiteSpace: 'nowrap',
+                  backgroundColor: active ? '#0f121a' : 'transparent',
                   border: 'none',
-                  borderBottom: active ? '2px solid #2563eb' : '2px solid transparent',
+                  borderBottom: active ? '2px solid #c8aa6e' : '2px solid transparent',
                   color: active ? '#ffffff' : '#94a3b8',
                   fontSize: '13px',
-                  fontWeight: 600,
+                  fontWeight: active ? 700 : 500,
                   cursor: 'pointer',
                   transition: 'background-color 0.15s ease, color 0.15s ease',
                 }}
               >
-                <Icon size={16} aria-hidden="true" />
+                <Icon size={15} color={active ? '#c8aa6e' : '#94a3b8'} aria-hidden="true" />
                 <span>{t.label}</span>
               </button>
             );
@@ -243,22 +254,29 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '14px 16px',
-                    backgroundColor: '#1e293b',
+                    backgroundColor: '#151923',
                     borderRadius: '8px',
-                    border: '1px solid rgba(255, 255, 255, 0.06)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
                     cursor: 'pointer',
                     textAlign: 'left',
                     width: '100%',
-                    transition: 'border-color 0.15s ease, transform 0.1s ease',
+                    transition: 'border-color 0.15s ease, background-color 0.15s ease',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#38bdf8')}
-                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)')}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#c8aa6e';
+                    e.currentTarget.style.backgroundColor = '#1c2230';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                    e.currentTarget.style.backgroundColor = '#151923';
+                  }}
                 >
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: '15px', fontWeight: 700, color: '#f8fafc' }}>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#f8fafc' }}>
                       {fg.title} ({fg.year})
                     </div>
-                    <div style={{ fontSize: '12px', color: '#38bdf8', marginTop: '2px' }}>
+                    <div style={{ fontSize: '12px', color: '#c8aa6e', marginTop: '2px' }}>
                       {fg.white} vs {fg.black} • {fg.subtitle}
                     </div>
                     <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
@@ -291,8 +309,8 @@ export const GameImportModal: React.FC<GameImportModalProps> = ({
                   style={{
                     flex: 1,
                     padding: '10px 14px',
-                    backgroundColor: '#1e293b',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    backgroundColor: '#151923',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
                     borderRadius: '6px',
                     color: '#ffffff',
                     fontSize: '13px',

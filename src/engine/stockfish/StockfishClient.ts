@@ -10,6 +10,7 @@ export class StockfishClient {
   private currentRequestId = 0;
   private activeConfig: EngineConfig = ENGINE_PRESETS.balanced;
   private workerUrl = '/engine/stockfish-19-lite-single.js';
+  private activeStopPromise: Promise<void> | null = null;
 
   private onLineCallbacks: Array<(line: string) => void> = [];
 
@@ -77,7 +78,7 @@ export class StockfishClient {
     this.activeConfig = config;
     if (!this.isReady || !this.worker) return;
 
-    if (this.isSearching) {
+    if (this.isSearching || this.activeStopPromise) {
       await this.stop();
     }
 
@@ -91,7 +92,7 @@ export class StockfishClient {
 
   public async newGame(): Promise<void> {
     if (!this.isReady || !this.worker) return;
-    if (this.isSearching) {
+    if (this.isSearching || this.activeStopPromise) {
       await this.stop();
     }
     this.sendCommand('ucinewgame');
@@ -161,7 +162,7 @@ export class StockfishClient {
     }
 
     // Stop previous search if any and wait until engine is quiescent
-    if (this.isSearching) {
+    if (this.isSearching || this.activeStopPromise) {
       await this.stop();
     }
 
@@ -266,9 +267,14 @@ export class StockfishClient {
   }
 
   public async stop(): Promise<void> {
-    if (!this.isSearching || !this.worker) return;
+    if (!this.worker) return;
+    if (!this.isSearching && !this.activeStopPromise) return;
 
-    return new Promise<void>((resolve) => {
+    if (this.activeStopPromise) {
+      return this.activeStopPromise;
+    }
+
+    this.activeStopPromise = new Promise<void>((resolve) => {
       let resolved = false;
       const done = () => {
         if (resolved) return;
@@ -276,10 +282,11 @@ export class StockfishClient {
         clearTimeout(timer);
         this.removeLineListener(listener);
         this.isSearching = false;
+        this.activeStopPromise = null;
         resolve();
       };
 
-      const timer = setTimeout(done, 400);
+      const timer = setTimeout(done, 1200);
 
       const listener = (line: string) => {
         if (line.startsWith('bestmove ') || line.includes('readyok')) {
@@ -289,19 +296,22 @@ export class StockfishClient {
 
       this.onLineCallbacks.push(listener);
       this.sendCommand('stop');
+      this.sendCommand('isready');
     });
+
+    return this.activeStopPromise;
   }
 
   public destroy(): void {
-    if (this.isSearching) {
-      this.sendCommand('stop');
-      this.isSearching = false;
-    }
-    this.sendCommand('quit');
+    this.activeStopPromise = null;
+    this.isSearching = false;
+    this.isReady = false;
     if (this.worker) {
-      this.worker.terminate();
+      try {
+        this.worker.postMessage('quit');
+        this.worker.terminate();
+      } catch {}
       this.worker = null;
     }
-    this.isReady = false;
   }
 }

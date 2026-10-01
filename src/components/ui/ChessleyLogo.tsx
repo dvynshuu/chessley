@@ -26,64 +26,49 @@ export const ChessleyLogo: React.FC<ChessleyLogoProps> = ({
         ...style,
       }}
     >
-      {/* Luxury Knight Emblem Tile */}
+      {/* Precision Knight Emblem Tile */}
       <div
         style={{
           width: `${size}px`,
           height: `${size}px`,
-          borderRadius: `${Math.round(size * 0.26)}px`,
-          background: 'linear-gradient(145deg, #10141d, #060911)',
+          borderRadius: `${Math.round(size * 0.22)}px`,
+          backgroundColor: '#0f121a',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
-          boxShadow: `0 ${Math.max(2, Math.round(size * 0.08))}px ${Math.max(6, Math.round(size * 0.25))}px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(200, 170, 110, 0.25), 0 0 ${Math.max(4, Math.round(size * 0.2))}px rgba(200, 170, 110, 0.15)`,
-          border: '1px solid rgba(200, 170, 110, 0.25)',
+          boxShadow: `0 ${Math.max(1, Math.round(size * 0.05))}px ${Math.max(4, Math.round(size * 0.15))}px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1)`,
+          border: '1px solid rgba(200, 170, 110, 0.3)',
           overflow: 'hidden',
           flexShrink: 0,
         }}
       >
-        {/* Subtle warm center radial sheen */}
-        <div
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            background: 'radial-gradient(circle at 50% 40%, rgba(200, 170, 110, 0.15) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          }}
-        />
-
         {/* High-res Knight Emblem */}
         <img
           src="/icons/icon-192x192.png"
           alt="Chessley Logo"
-          width={Math.round(size * 0.94)}
-          height={Math.round(size * 0.94)}
+          width={Math.round(size * 0.9)}
+          height={Math.round(size * 0.9)}
           style={{
             objectFit: 'contain',
-            filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5))',
-            transform: 'scale(1.02)',
+            filter: 'drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6))',
             zIndex: 1,
           }}
           loading="eager"
         />
       </div>
 
-      {/* Optional Wordmark */}
+      {/* Wordmark */}
       {withWordmark && (
-        <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
+        <div className="chessley-wordmark" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span
               style={{
                 fontSize: `${Math.max(15, Math.round(size * 0.48))}px`,
                 fontWeight: 800,
                 color: '#f8fafc',
-                letterSpacing: '-0.2px',
+                letterSpacing: '-0.3px',
                 fontFamily: "'Inter', sans-serif",
-                background: 'linear-gradient(180deg, #ffffff 30%, #e2e8f0 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
               }}
             >
               Chessley
@@ -92,11 +77,11 @@ export const ChessleyLogo: React.FC<ChessleyLogoProps> = ({
               style={{
                 fontSize: '9px',
                 fontWeight: 700,
-                padding: '2px 6px',
+                padding: '2px 5px',
                 borderRadius: '4px',
-                background: 'rgba(200, 170, 110, 0.12)',
+                backgroundColor: 'rgba(200, 170, 110, 0.1)',
                 color: '#c8aa6e',
-                border: '1px solid rgba(200, 170, 110, 0.35)',
+                border: '1px solid rgba(200, 170, 110, 0.3)',
                 letterSpacing: '0.6px',
                 textTransform: 'uppercase',
               }}
@@ -106,6 +91,7 @@ export const ChessleyLogo: React.FC<ChessleyLogoProps> = ({
           </div>
 
           <div
+            className="chessley-wordmark-subtitle"
             style={{
               fontSize: `${Math.max(10, Math.round(size * 0.28))}px`,
               color: '#94a3b8',

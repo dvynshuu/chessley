@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ChessGame, MoveAnalysis } from '../../chess/types';
 import { formatScore } from '../../chess/EvaluationUtils';
 import { CLASSIFICATION_META } from '../../chess/Classification';
@@ -16,22 +16,23 @@ export const MoveList: React.FC<MoveListProps> = ({
   currentPly,
   onSelectPly,
 }) => {
-  const activeItemRef = useRef<HTMLButtonElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const activeItemRef = useRef<HTMLButtonElement>(null);
 
-  // Group moves into pairs (1. White Black, 2. White Black)
-  const movePairs = [];
+  // Group moves into pairs: [Move 1 White, Move 1 Black], [Move 2 White, Move 2 Black], etc.
+  const movePairs: { moveNumber: number; white?: { san: string; ply: number }; black?: { san: string; ply: number } }[] = [];
   for (let i = 0; i < game.moves.length; i += 2) {
+    const moveNumber = Math.floor(i / 2) + 1;
     movePairs.push({
-      moveNumber: Math.floor(i / 2) + 1,
-      white: game.moves[i],
-      black: game.moves[i + 1] || null,
+      moveNumber,
+      white: { san: game.moves[i].san, ply: i + 1 },
+      black: game.moves[i + 1] ? { san: game.moves[i + 1].san, ply: i + 2 } : undefined,
     });
   }
 
-  // Auto-scroll to active move
+  // Smooth scroll container to keep current move in view
   useEffect(() => {
-    if (activeItemRef.current && containerRef.current) {
+    if (activeItemRef.current) {
       activeItemRef.current.scrollIntoView({
         behavior: 'smooth',
         block: 'nearest',
@@ -48,13 +49,11 @@ export const MoveList: React.FC<MoveListProps> = ({
         height: '100%',
         maxHeight: '340px',
         overflowY: 'auto',
-        backgroundColor: 'rgba(15, 23, 42, 0.72)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderRadius: '10px',
+        backgroundColor: '#0f121a',
+        borderRadius: '8px',
         border: '1px solid rgba(255, 255, 255, 0.08)',
         padding: '8px',
-        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4)',
+        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.4)',
         fontFamily: "'JetBrains Mono', monospace",
         fontSize: '13px',
       }}
@@ -97,21 +96,25 @@ export const MoveList: React.FC<MoveListProps> = ({
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '5px 8px',
-                  borderRadius: '6px',
+                  borderRadius: '4px',
                   border: 'none',
-                  background: isWhiteActive
-                    ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.95), rgba(59, 130, 246, 0.85))'
-                    : 'transparent',
-                  color: isWhiteActive ? '#ffffff' : '#f1f5f9',
+                  backgroundColor: isWhiteActive ? '#1c2436' : 'transparent',
+                  color: isWhiteActive ? '#ffffff' : '#cbd5e1',
                   cursor: 'pointer',
                   fontWeight: isWhiteActive ? 800 : 500,
                   boxShadow: isWhiteActive
-                    ? '0 2px 10px rgba(37, 99, 235, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.25)'
+                    ? '0 1px 2px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06)'
                     : 'none',
-                  borderLeft: isWhiteActive ? '3px solid #38bdf8' : '3px solid transparent',
-                  transition: 'background-color 0.12s ease, border-left-color 0.12s ease, box-shadow 0.12s ease',
+                  borderLeft: isWhiteActive ? '3px solid #c8aa6e' : '3px solid transparent',
+                  transition: 'background-color 0.12s ease, border-left-color 0.12s ease',
                   fontFamily: 'inherit',
                   fontSize: 'inherit',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isWhiteActive) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.04)';
+                }}
+                onMouseLeave={(e) => {
+                  if (!isWhiteActive) e.currentTarget.style.backgroundColor = 'transparent';
                 }}
               >
                 <span>{pair.white.san}</span>
@@ -158,22 +161,26 @@ export const MoveList: React.FC<MoveListProps> = ({
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '5px 8px',
-                  borderRadius: '6px',
+                  borderRadius: '4px',
                   border: 'none',
-                  background: isBlackActive
-                    ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.95), rgba(59, 130, 246, 0.85))'
-                    : 'transparent',
-                  color: isBlackActive ? '#ffffff' : '#f1f5f9',
+                  backgroundColor: isBlackActive ? '#1c2436' : 'transparent',
+                  color: isBlackActive ? '#ffffff' : '#cbd5e1',
                   cursor: 'pointer',
                   fontWeight: isBlackActive ? 800 : 500,
                   boxShadow: isBlackActive
-                    ? '0 2px 10px rgba(37, 99, 235, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.25)'
+                    ? '0 1px 2px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06)'
                     : 'none',
-                  borderLeft: isBlackActive ? '3px solid #38bdf8' : '3px solid transparent',
-                  transition: 'background-color 0.12s ease, border-left-color 0.12s ease, box-shadow 0.12s ease',
+                  borderLeft: isBlackActive ? '3px solid #c8aa6e' : '3px solid transparent',
+                  transition: 'background-color 0.12s ease, border-left-color 0.12s ease',
                   marginLeft: '4px',
                   fontFamily: 'inherit',
                   fontSize: 'inherit',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isBlackActive) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.04)';
+                }}
+                onMouseLeave={(e) => {
+                  if (!isBlackActive) e.currentTarget.style.backgroundColor = 'transparent';
                 }}
               >
                 <span>{pair.black.san}</span>
@@ -210,21 +217,6 @@ export const MoveList: React.FC<MoveListProps> = ({
           </div>
         );
       })}
-
-      {game.moves.length === 0 && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%',
-            color: '#64748b',
-            fontStyle: 'italic',
-          }}
-        >
-          No moves loaded yet.
-        </div>
-      )}
     </div>
   );
 };

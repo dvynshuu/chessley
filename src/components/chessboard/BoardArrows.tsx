@@ -1,7 +1,7 @@
 import React from 'react';
 import { PieceColor } from '../../chess/types';
 
-interface ArrowDef {
+export interface ArrowDef {
   from: string;
   to: string;
   color: string;
@@ -17,34 +17,28 @@ interface BoardArrowsProps {
 export const BoardArrows: React.FC<BoardArrowsProps> = ({ arrows, orientation }) => {
   if (arrows.length === 0) return null;
 
-  const squareToCoords = (sq: string): { x: number; y: number } | null => {
-    if (sq.length < 2) return null;
-    const file = sq[0].toLowerCase();
-    const rank = parseInt(sq[1], 10);
-    if (isNaN(rank) || file < 'a' || file > 'h' || rank < 1 || rank > 8) return null;
+  // Convert chess square (e.g. 'e4') to 0-100 viewBox percentages
+  const squareToCoords = (square: string): { x: number; y: number } | null => {
+    if (square.length < 2) return null;
+    const file = square.charCodeAt(0) - 97; // 0 to 7 (a to h)
+    const rank = parseInt(square[1], 10) - 1; // 0 to 7 (1 to 8)
+    if (file < 0 || file > 7 || rank < 0 || rank > 7) return null;
 
-    let fileIdx = file.charCodeAt(0) - 'a'.charCodeAt(0);
-    let rankIdx = 8 - rank; // 0 at rank 8, 7 at rank 1
+    const col = orientation === 'w' ? file : 7 - file;
+    const row = orientation === 'w' ? 7 - rank : rank;
 
-    if (orientation === 'b') {
-      fileIdx = 7 - fileIdx;
-      rankIdx = rank - 1;
-    }
+    const x = col * 12.5 + 6.25;
+    const y = row * 12.5 + 6.25;
 
-    return {
-      x: fileIdx * 12.5 + 6.25,
-      y: rankIdx * 12.5 + 6.25,
-    };
+    return { x, y };
   };
 
   return (
     <svg
       viewBox="0 0 100 100"
-      aria-hidden="true"
       style={{
         position: 'absolute',
-        top: 0,
-        left: 0,
+        inset: 0,
         width: '100%',
         height: '100%',
         pointerEvents: 'none',
@@ -52,50 +46,24 @@ export const BoardArrows: React.FC<BoardArrowsProps> = ({ arrows, orientation })
       }}
     >
       <defs>
-        {/* Glow Filters */}
-        <filter id="arrow-glow-emerald" x="-30%" y="-30%" width="160%" height="160%">
-          <feDropShadow dx="0" dy="0" stdDeviation="1.2" floodColor="#10b981" floodOpacity="0.75" />
-        </filter>
-        <filter id="arrow-glow-red" x="-30%" y="-30%" width="160%" height="160%">
-          <feDropShadow dx="0" dy="0" stdDeviation="1.2" floodColor="#ef4444" floodOpacity="0.75" />
-        </filter>
-        <filter id="arrow-glow-orange" x="-30%" y="-30%" width="160%" height="160%">
-          <feDropShadow dx="0" dy="0" stdDeviation="1.2" floodColor="#f97316" floodOpacity="0.75" />
+        {/* Crisp Physical Drop Shadow for Contrast without Radioactive Glow */}
+        <filter id="arrow-tactile-shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="1.2" stdDeviation="1" floodColor="#000000" floodOpacity="0.65" />
         </filter>
 
-        {/* Gradients */}
-        <linearGradient id="grad-emerald" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#10b981" />
-          <stop offset="100%" stopColor="#34d399" />
-        </linearGradient>
-        <linearGradient id="grad-red" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#ef4444" />
-          <stop offset="100%" stopColor="#f87171" />
-        </linearGradient>
-        <linearGradient id="grad-orange" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#f97316" />
-          <stop offset="100%" stopColor="#fb923c" />
-        </linearGradient>
-
-        {arrows.map((arr, i) => {
-          const isEmerald = arr.color.includes('10b981') || arr.color === '#10b981';
-          const isRed = arr.color.includes('ef4444') || arr.color === '#ef4444';
-          const fillColor = isEmerald ? 'url(#grad-emerald)' : isRed ? 'url(#grad-red)' : arr.color;
-
-          return (
-            <marker
-              key={`marker_${i}`}
-              id={`arrowhead_${i}`}
-              markerWidth="6"
-              markerHeight="6"
-              refX="3.5"
-              refY="3"
-              orient="auto"
-            >
-              <polygon points="0 1, 5 3, 0 5" fill={fillColor} />
-            </marker>
-          );
-        })}
+        {arrows.map((arr, i) => (
+          <marker
+            key={`marker_${i}`}
+            id={`arrowhead_${i}`}
+            markerWidth="5"
+            markerHeight="5"
+            refX="3"
+            refY="2.5"
+            orient="auto"
+          >
+            <polygon points="0 0.8, 4.5 2.5, 0 4.2" fill={arr.color} />
+          </marker>
+        ))}
       </defs>
 
       {arrows.map((arr, i) => {
@@ -113,20 +81,15 @@ export const BoardArrows: React.FC<BoardArrowsProps> = ({ arrows, orientation })
         const endX = p2.x - (dx / dist) * shorten;
         const endY = p2.y - (dy / dist) * shorten;
 
-        const isEmerald = arr.color.includes('10b981') || arr.color === '#10b981';
-        const isRed = arr.color.includes('ef4444') || arr.color === '#ef4444';
-        const strokeColor = isEmerald ? 'url(#grad-emerald)' : isRed ? 'url(#grad-red)' : arr.color;
-        const filterId = isEmerald ? 'url(#arrow-glow-emerald)' : isRed ? 'url(#arrow-glow-red)' : undefined;
-
         return (
-          <g key={`arrow_${i}`} opacity={arr.opacity ?? 0.9} filter={filterId}>
+          <g key={`arrow_${i}`} opacity={arr.opacity ?? 0.88} filter="url(#arrow-tactile-shadow)">
             <line
               x1={p1.x}
               y1={p1.y}
               x2={endX}
               y2={endY}
-              stroke={strokeColor}
-              strokeWidth={arr.width ?? 3.0}
+              stroke={arr.color}
+              strokeWidth={arr.width ?? 2.8}
               strokeLinecap="round"
               markerEnd={`url(#arrowhead_${i})`}
             />

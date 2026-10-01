@@ -32,28 +32,31 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   return (
     <header
+      className="navbar-header"
       style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '12px 28px',
-        backgroundColor: 'rgba(15, 23, 42, 0.75)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
+        padding: '8px 14px',
+        paddingTop: 'max(8px, env(safe-area-inset-top, 8px))',
+        paddingLeft: 'max(10px, env(safe-area-inset-left, 10px))',
+        paddingRight: 'max(10px, env(safe-area-inset-right, 10px))',
+        backgroundColor: '#0f121a',
         borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.5)',
+        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.6)',
         position: 'sticky',
         top: 0,
         zIndex: 40,
+        gap: '8px',
       }}
     >
       {/* Brand */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <ChessleyLogo size={36} withWordmark />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+        <ChessleyLogo size={32} withWordmark />
       </div>
 
       {/* Center Actions / Analysis Control */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {analysisStatus === 'idle' && (
           <button
             type="button"
@@ -62,27 +65,34 @@ export const Navbar: React.FC<NavbarProps> = ({
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '7px',
-              padding: '8px 18px',
-              background: 'linear-gradient(135deg, #10b981, #059669)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '8px',
+              gap: '6px',
+              padding: '8px 14px',
+              minHeight: '38px',
+              backgroundColor: '#059669',
+              border: '1px solid #10b981',
+              borderRadius: '6px',
               color: '#ffffff',
               fontSize: '13px',
               fontWeight: 700,
               cursor: 'pointer',
-              boxShadow: '0 0 16px rgba(16, 185, 129, 0.4)',
-              transition: 'background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+              whiteSpace: 'nowrap',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#10b981';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#059669';
             }}
           >
-            <Play size={15} fill="#ffffff" aria-hidden="true" />
-            Analyze Game
+            <Play size={14} fill="#ffffff" aria-hidden="true" />
+            <span>Analyze<span className="btn-label-desktop"> Game</span></span>
           </button>
         )}
 
         {analysisStatus === 'analyzing' && (
           <div
-            style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
             aria-live="polite"
           >
             <button
@@ -93,42 +103,50 @@ export const Navbar: React.FC<NavbarProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
-                padding: '8px 14px',
-                backgroundColor: 'rgba(30, 41, 59, 0.8)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                borderRadius: '8px',
-                color: '#ffffff',
-                fontSize: '13px',
+                padding: '8px 12px',
+                minHeight: '38px',
+                backgroundColor: '#1c2230',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '6px',
+                color: '#f8fafc',
+                fontSize: '12px',
                 fontWeight: 600,
                 cursor: 'pointer',
-                backdropFilter: 'blur(8px)',
-                transition: 'background-color 0.15s ease, border-color 0.15s ease',
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#232a3b';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#1c2230';
               }}
             >
-              <Pause size={14} aria-hidden="true" />
-              Pause ({progressPercent}%)
+              <Pause size={13} aria-hidden="true" />
+              <span>Pause<span className="btn-label-desktop"> ({progressPercent}%)</span></span>
             </button>
             <div
+              className="navbar-progressbar"
               role="progressbar"
               aria-valuenow={progressPercent}
               aria-valuemin={0}
               aria-valuemax={100}
               aria-label="Analysis progress"
               style={{
-                width: '90px',
-                height: '7px',
-                backgroundColor: 'rgba(30, 41, 59, 0.9)',
-                borderRadius: '4px',
+                width: '72px',
+                height: '6px',
+                backgroundColor: '#151923',
+                borderRadius: '3px',
                 overflow: 'hidden',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
+                flexShrink: 0,
               }}
             >
               <div
                 style={{
                   width: `${progressPercent}%`,
                   height: '100%',
-                  background: 'linear-gradient(90deg, #10b981, #34d399)',
-                  boxShadow: '0 0 8px rgba(16, 185, 129, 0.6)',
+                  backgroundColor: '#10b981',
                   transition: 'width 0.2s ease',
                 }}
               />
@@ -145,16 +163,23 @@ export const Navbar: React.FC<NavbarProps> = ({
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '8px 16px',
-              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '8px',
+              padding: '8px 14px',
+              minHeight: '38px',
+              backgroundColor: '#d97706',
+              border: '1px solid #f59e0b',
+              borderRadius: '6px',
               color: '#ffffff',
               fontSize: '13px',
               fontWeight: 700,
               cursor: 'pointer',
-              boxShadow: '0 0 16px rgba(245, 158, 11, 0.4)',
-              transition: 'background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+              whiteSpace: 'nowrap',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f59e0b';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#d97706';
             }}
           >
             <Play size={14} fill="#ffffff" aria-hidden="true" />
@@ -171,21 +196,27 @@ export const Navbar: React.FC<NavbarProps> = ({
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '8px 16px',
-              backgroundColor: 'rgba(16, 185, 129, 0.15)',
-              border: '1px solid rgba(16, 185, 129, 0.6)',
-              borderRadius: '8px',
+              padding: '8px 14px',
+              minHeight: '38px',
+              backgroundColor: 'rgba(16, 185, 129, 0.12)',
+              border: '1px solid rgba(16, 185, 129, 0.4)',
+              borderRadius: '6px',
               color: '#34d399',
               fontSize: '13px',
               fontWeight: 700,
               cursor: 'pointer',
-              boxShadow: '0 0 14px rgba(16, 185, 129, 0.25)',
-              backdropFilter: 'blur(8px)',
-              transition: 'background-color 0.15s ease, border-color 0.15s ease',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+              whiteSpace: 'nowrap',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(16, 185, 129, 0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(16, 185, 129, 0.12)';
             }}
           >
             <CheckCircle size={15} aria-hidden="true" />
-            Review Summary
+            <span>Review<span className="btn-label-desktop"> Summary</span></span>
           </button>
         )}
 
@@ -198,49 +229,64 @@ export const Navbar: React.FC<NavbarProps> = ({
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '8px 14px',
-              backgroundColor: 'rgba(30, 41, 59, 0.7)',
-              border: '1px solid rgba(56, 189, 248, 0.3)',
-              borderRadius: '8px',
+              padding: '8px 12px',
+              minHeight: '38px',
+              backgroundColor: '#1c2230',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              borderRadius: '6px',
               color: '#f8fafc',
-              fontSize: '13px',
+              fontSize: '12px',
               fontWeight: 600,
               cursor: 'pointer',
-              boxShadow: '0 0 10px rgba(56, 189, 248, 0.15)',
-              backdropFilter: 'blur(8px)',
-              transition: 'background-color 0.15s ease, border-color 0.15s ease',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+              whiteSpace: 'nowrap',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#232a3b';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#1c2230';
             }}
           >
-            <Award size={15} color="#38bdf8" aria-hidden="true" />
-            Summary
+            <Award size={14} color="#c8aa6e" aria-hidden="true" />
+            <span>Summary</span>
           </button>
         )}
       </div>
 
       {/* Right Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
         <button
           type="button"
+          className="navbar-btn-import"
           onClick={onOpenImport}
+          title="Import Game"
           aria-label="Import game from Chess.com or PGN"
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
-            padding: '8px 16px',
-            background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            borderRadius: '8px',
+            padding: '8px 12px',
+            minHeight: '38px',
+            backgroundColor: '#2563eb',
+            border: '1px solid #3b82f6',
+            borderRadius: '6px',
             color: '#ffffff',
             fontSize: '13px',
             fontWeight: 600,
             cursor: 'pointer',
-            boxShadow: '0 0 16px rgba(37, 99, 235, 0.4)',
-            transition: 'background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease',
+            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+            whiteSpace: 'nowrap',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#3b82f6';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#2563eb';
           }}
         >
           <Upload size={15} aria-hidden="true" />
-          Import
+          <span className="btn-label-desktop">Import</span>
         </button>
 
         <button
@@ -249,27 +295,29 @@ export const Navbar: React.FC<NavbarProps> = ({
           title="Export Analysis"
           aria-label="Export analysis"
           style={{
-            padding: '8px',
-            backgroundColor: 'rgba(255, 255, 255, 0.04)',
+            width: '38px',
+            height: '38px',
+            backgroundColor: '#151923',
             border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '8px',
+            borderRadius: '6px',
             color: '#94a3b8',
             cursor: 'pointer',
-            transition: 'background-color 0.15s ease, color 0.15s ease',
+            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            flexShrink: 0,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+            e.currentTarget.style.backgroundColor = '#1c2230';
             e.currentTarget.style.color = '#ffffff';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.04)';
+            e.currentTarget.style.backgroundColor = '#151923';
             e.currentTarget.style.color = '#94a3b8';
           }}
         >
-          <Download size={16} aria-hidden="true" />
+          <Download size={15} aria-hidden="true" />
         </button>
 
         <button
@@ -278,27 +326,29 @@ export const Navbar: React.FC<NavbarProps> = ({
           title="Flip Board"
           aria-label="Flip board orientation"
           style={{
-            padding: '8px',
-            backgroundColor: 'rgba(255, 255, 255, 0.04)',
+            width: '38px',
+            height: '38px',
+            backgroundColor: '#151923',
             border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '8px',
+            borderRadius: '6px',
             color: '#94a3b8',
             cursor: 'pointer',
-            transition: 'background-color 0.15s ease, color 0.15s ease',
+            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            flexShrink: 0,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+            e.currentTarget.style.backgroundColor = '#1c2230';
             e.currentTarget.style.color = '#ffffff';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.04)';
+            e.currentTarget.style.backgroundColor = '#151923';
             e.currentTarget.style.color = '#94a3b8';
           }}
         >
-          <RotateCcw size={16} aria-hidden="true" />
+          <RotateCcw size={15} aria-hidden="true" />
         </button>
 
         <button
@@ -307,27 +357,29 @@ export const Navbar: React.FC<NavbarProps> = ({
           title="Settings"
           aria-label="Open settings and engine configurations"
           style={{
-            padding: '8px',
-            backgroundColor: 'rgba(255, 255, 255, 0.04)',
+            width: '38px',
+            height: '38px',
+            backgroundColor: '#151923',
             border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '8px',
+            borderRadius: '6px',
             color: '#94a3b8',
             cursor: 'pointer',
-            transition: 'background-color 0.15s ease, color 0.15s ease',
+            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            flexShrink: 0,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+            e.currentTarget.style.backgroundColor = '#1c2230';
             e.currentTarget.style.color = '#ffffff';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.04)';
+            e.currentTarget.style.backgroundColor = '#151923';
             e.currentTarget.style.color = '#94a3b8';
           }}
         >
-          <Settings size={16} aria-hidden="true" />
+          <Settings size={15} aria-hidden="true" />
         </button>
       </div>
     </header>

@@ -116,8 +116,7 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
     ctx.lineTo(points[points.length - 1].x, midY);
     ctx.closePath();
     const whiteGrad = ctx.createLinearGradient(0, 0, 0, midY);
-    whiteGrad.addColorStop(0, 'rgba(56, 189, 248, 0.4)');
-    whiteGrad.addColorStop(0.7, 'rgba(248, 250, 252, 0.15)');
+    whiteGrad.addColorStop(0, 'rgba(248, 250, 252, 0.22)');
     whiteGrad.addColorStop(1, 'rgba(248, 250, 252, 0.02)');
     ctx.fillStyle = whiteGrad;
     ctx.fill();
@@ -129,24 +128,19 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
     ctx.lineTo(points[points.length - 1].x, midY);
     ctx.closePath();
     const blackGrad = ctx.createLinearGradient(0, midY, 0, height);
-    blackGrad.addColorStop(0, 'rgba(124, 58, 237, 0.02)');
-    blackGrad.addColorStop(0.7, 'rgba(124, 58, 237, 0.18)');
-    blackGrad.addColorStop(1, 'rgba(124, 58, 237, 0.45)');
+    blackGrad.addColorStop(0, 'rgba(0, 0, 0, 0.05)');
+    blackGrad.addColorStop(1, 'rgba(0, 0, 0, 0.35)');
     ctx.fillStyle = blackGrad;
     ctx.fill();
 
-    // 4. Draw Main Evaluation Spline Curve with Neon Glow
-    ctx.save();
-    ctx.shadowColor = 'rgba(56, 189, 248, 0.7)';
-    ctx.shadowBlur = 8;
+    // 4. Draw Main Evaluation Spline Curve (Crisp Architectural Precision)
     ctx.beginPath();
     drawSmoothPath(points);
-    ctx.strokeStyle = '#38bdf8';
-    ctx.lineWidth = 2.4;
+    ctx.strokeStyle = '#c8aa6e';
+    ctx.lineWidth = 1.8;
     ctx.stroke();
-    ctx.restore();
 
-    // 5. Draw Blunder & Mistake Markers with Halo
+    // 5. Draw Move Classification Quality Dots
     for (const pt of points) {
       if (!pt.analysis) continue;
       const c = pt.analysis.classification;
@@ -159,21 +153,15 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
             ? '#e11d48'
             : c === 'mistake'
             ? '#f97316'
-            : '#00e5ff';
+            : '#10b981';
 
-        // Outer subtle halo
-        ctx.beginPath();
-        ctx.arc(pt.x, pt.y, isMajor ? 6.5 : 5, 0, Math.PI * 2);
-        ctx.fillStyle = color === '#00e5ff' ? 'rgba(0, 229, 255, 0.25)' : 'rgba(239, 68, 68, 0.25)';
-        ctx.fill();
-
-        // Inner solid dot
+        // Outer dot
         ctx.beginPath();
         ctx.arc(pt.x, pt.y, isMajor ? 4 : 3, 0, Math.PI * 2);
         ctx.fillStyle = color;
         ctx.fill();
-        ctx.strokeStyle = '#0f172a';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#0f121a';
+        ctx.lineWidth = 1.2;
         ctx.stroke();
       }
     }
@@ -182,19 +170,17 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
     if (currentPly >= 0 && currentPly <= totalPlies) {
       const curX = (currentPly / totalPlies) * width;
       ctx.save();
-      ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
-      ctx.shadowBlur = 6;
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(curX, 0);
       ctx.lineTo(curX, height);
       ctx.stroke();
 
-      // Glowing cursor head
-      ctx.fillStyle = '#ffffff';
+      // Precision cursor head
+      ctx.fillStyle = '#c8aa6e';
       ctx.beginPath();
-      ctx.arc(curX, midY, 4, 0, Math.PI * 2);
+      ctx.arc(curX, midY, 3, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
@@ -222,6 +208,18 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
     onSelectPly(ply);
   };
 
+  const handleTouch = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas || totalPlies === 0) return;
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0] || e.changedTouches[0];
+    if (!touch) return;
+    const x = Math.max(0, Math.min(rect.width, touch.clientX - rect.left));
+    const ply = Math.round((x / rect.width) * totalPlies);
+    setHoverPly(ply);
+    onSelectPly(ply);
+  };
+
   const hoverAnalysis = hoverPly ? analyses[hoverPly] : null;
 
   return (
@@ -230,12 +228,10 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
         style={{
           width: '100%',
           height: '96px',
-          backgroundColor: 'rgba(15, 23, 42, 0.75)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          borderRadius: '10px',
+          backgroundColor: '#0f121a',
+          borderRadius: '8px',
           border: '1px solid rgba(255, 255, 255, 0.08)',
-          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
           overflow: 'hidden',
           cursor: 'crosshair',
           position: 'relative',
@@ -250,10 +246,13 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
           aria-valuemax={totalPlies}
           aria-valuenow={currentPly}
           aria-valuetext={currentPly === 0 ? 'Start position' : `Ply ${currentPly}`}
-          style={{ width: '100%', height: '100%', display: 'block' }}
+          style={{ width: '100%', height: '100%', display: 'block', touchAction: 'none' }}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
           onClick={handleClick}
+          onTouchStart={handleTouch}
+          onTouchMove={handleTouch}
+          onTouchEnd={() => setHoverPly(null)}
           onKeyDown={(e) => {
             if (e.key === 'ArrowLeft') {
               e.preventDefault();
@@ -271,7 +270,7 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
           }}
         />
 
-        {/* Floating Glass Hover Tooltip */}
+        {/* Floating Workstation Hover Tooltip */}
         {hoverPly !== null && (
           <div
             className="tabular-nums"
@@ -280,10 +279,9 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
               top: '6px',
               left: `${Math.min(85, Math.max(15, (hoverPly / totalPlies) * 100))}%`,
               transform: 'translateX(-50%)',
-              backgroundColor: 'rgba(15, 23, 42, 0.92)',
-              backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(56, 189, 248, 0.35)',
-              borderRadius: '6px',
+              backgroundColor: '#151923',
+              border: '1px solid rgba(200, 170, 110, 0.35)',
+              borderRadius: '4px',
               padding: '3px 10px',
               fontSize: '11px',
               fontWeight: 700,
@@ -291,7 +289,7 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
               color: '#f8fafc',
               pointerEvents: 'none',
               whiteSpace: 'nowrap',
-              boxShadow: '0 8px 20px rgba(0, 0, 0, 0.6), 0 0 10px rgba(56, 189, 248, 0.25)',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.7)',
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
@@ -308,7 +306,7 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
                 {hoverAnalysis && (
                   <span style={{ color: '#ffffff', fontWeight: 800 }}>{hoverAnalysis.san}</span>
                 )}
-                <span style={{ color: '#38bdf8' }}>
+                <span style={{ color: '#c8aa6e' }}>
                   {hoverAnalysis ? formatScore(hoverAnalysis.playedScoreAfter) : '—'}
                 </span>
               </>

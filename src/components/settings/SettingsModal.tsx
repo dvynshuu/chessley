@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
+import { X, Sliders, Palette, Volume2, VolumeX, Eye } from 'lucide-react';
 import { useSettingsStore, BoardTheme } from '../../state/settingsStore';
 import { EngineMode } from '../../engine/stockfish/EngineTypes';
-import { X, Volume2, VolumeX, Eye, Sliders, Palette } from 'lucide-react';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -10,18 +10,19 @@ interface SettingsModalProps {
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   const {
+    boardTheme,
     engineMode,
     depth,
-    soundEnabled,
     showArrows,
-    boardTheme,
+    soundEnabled,
+    setBoardTheme,
     setEngineMode,
     setDepth,
-    setSoundEnabled,
     setShowArrows,
-    setBoardTheme,
+    setSoundEnabled,
   } = useSettingsStore();
 
+  // Escape to close
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -44,7 +45,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
         position: 'fixed',
         inset: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.75)',
-        backdropFilter: 'blur(5px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -59,17 +59,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
         style={{
           width: '100%',
           maxWidth: '520px',
-          backgroundColor: 'rgba(15, 23, 42, 0.88)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          borderRadius: '14px',
-          border: '1px solid rgba(255, 255, 255, 0.12)',
+          maxHeight: '90vh',
+          backgroundColor: '#0f121a',
+          borderRadius: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.85), 0 0 35px rgba(124, 58, 237, 0.2)',
+          boxShadow: '0 24px 64px -8px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.08)',
           fontFamily: "'Inter', sans-serif",
           color: '#f8fafc',
-          overflow: 'hidden',
+          overflowY: 'auto',
         }}
       >
         {/* Header */}
@@ -82,8 +81,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
             borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
           }}
         >
-          <h2 id="settings-modal-title" className="text-balance" style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>
-            Settings & Engine
+          <h2 id="settings-modal-title" className="text-balance" style={{ fontSize: '17px', fontWeight: 800, margin: 0 }}>
+            Settings &amp; Engine
           </h2>
           <button
             type="button"
@@ -101,8 +100,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
               justifyContent: 'center',
               transition: 'color 150ms ease, background-color 150ms ease',
             }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#1c2230';
+              e.currentTarget.style.color = '#ffffff';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = '#94a3b8';
+            }}
           >
-            <X size={20} aria-hidden="true" />
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
 
@@ -112,7 +119,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
           <div>
             <div
               style={{
-                fontSize: '13px',
+                fontSize: '12px',
                 fontWeight: 700,
                 color: '#94a3b8',
                 marginBottom: '10px',
@@ -121,41 +128,44 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 gap: '6px',
               }}
             >
-              <Palette size={16} color="#38bdf8" aria-hidden="true" />
+              <Palette size={15} color="#c8aa6e" aria-hidden="true" />
               <span>Board Theme</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
-              {(['tournament', 'dark', 'glass', 'wood', 'midnight'] as BoardTheme[]).map((theme) => (
-                <button
-                  type="button"
-                  key={theme}
-                  onClick={() => setBoardTheme(theme)}
-                  aria-pressed={boardTheme === theme}
-                  style={{
-                    padding: '8px 4px',
-                    backgroundColor:
-                      boardTheme === theme
-                        ? theme === 'midnight'
-                          ? '#7c3aed'
-                          : '#2563eb'
-                        : 'rgba(30, 41, 59, 0.7)',
-                    border:
-                      boardTheme === theme
-                        ? '1px solid rgba(255, 255, 255, 0.3)'
-                        : '1px solid rgba(255, 255, 255, 0.06)',
-                    borderRadius: '6px',
-                    color: '#ffffff',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    textTransform: 'capitalize',
-                    boxShadow: boardTheme === theme ? '0 0 10px rgba(37, 99, 235, 0.5)' : 'none',
-                    transition: 'background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease',
-                  }}
-                >
-                  {theme}
-                </button>
-              ))}
+              {(['tournament', 'dark', 'glass', 'wood', 'midnight'] as BoardTheme[]).map((theme) => {
+                const isActive = boardTheme === theme;
+                return (
+                  <button
+                    type="button"
+                    key={theme}
+                    onClick={() => setBoardTheme(theme)}
+                    aria-pressed={isActive}
+                    style={{
+                      padding: '8px 4px',
+                      backgroundColor: isActive ? '#1c2436' : '#151923',
+                      border: isActive
+                        ? '1px solid #c8aa6e'
+                        : '1px solid rgba(255, 255, 255, 0.08)',
+                      borderRadius: '6px',
+                      color: isActive ? '#ffffff' : '#cbd5e1',
+                      fontSize: '11px',
+                      fontWeight: isActive ? 700 : 500,
+                      cursor: 'pointer',
+                      textTransform: 'capitalize',
+                      boxShadow: isActive ? '0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)' : '0 1px 2px rgba(0, 0, 0, 0.2)',
+                      transition: 'background-color 150ms ease, border-color 150ms ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) e.currentTarget.style.backgroundColor = '#1c2230';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) e.currentTarget.style.backgroundColor = '#151923';
+                    }}
+                  >
+                    {theme}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -163,7 +173,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
           <div>
             <div
               style={{
-                fontSize: '13px',
+                fontSize: '12px',
                 fontWeight: 700,
                 color: '#94a3b8',
                 marginBottom: '10px',
@@ -172,41 +182,54 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 gap: '6px',
               }}
             >
-              <Sliders size={16} color="#10b981" aria-hidden="true" />
+              <Sliders size={15} color="#10b981" aria-hidden="true" />
               <span>Analysis Profile</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
-              {(['fast', 'balanced', 'deep', 'max'] as EngineMode[]).map((mode) => (
-                <button
-                  type="button"
-                  key={mode}
-                  onClick={() => setEngineMode(mode)}
-                  aria-pressed={engineMode === mode}
-                  style={{
-                    padding: '8px',
-                    backgroundColor:
-                      engineMode === mode
+              {(['fast', 'balanced', 'deep', 'max'] as EngineMode[]).map((mode) => {
+                const isActive = engineMode === mode;
+                return (
+                  <button
+                    type="button"
+                    key={mode}
+                    onClick={() => setEngineMode(mode)}
+                    aria-pressed={isActive}
+                    style={{
+                      padding: '8px',
+                      backgroundColor: isActive
                         ? mode === 'max'
-                          ? '#7c3aed'
+                          ? '#c8aa6e'
                           : '#2563eb'
-                        : '#1e293b',
-                    border:
-                      engineMode === mode && mode === 'max'
-                        ? '1px solid #a78bfa'
+                        : '#151923',
+                      border: isActive
+                        ? mode === 'max'
+                          ? '1px solid #d4ba82'
+                          : '1px solid #3b82f6'
                         : '1px solid rgba(255, 255, 255, 0.08)',
-                    borderRadius: '6px',
-                    color: '#ffffff',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    textTransform: 'capitalize',
-                    boxShadow: engineMode === mode && mode === 'max' ? '0 0 10px rgba(124, 58, 237, 0.5)' : 'none',
-                    transition: 'background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease',
-                  }}
-                >
-                  {mode === 'max' ? '★ Max' : mode}
-                </button>
-              ))}
+                      borderRadius: '6px',
+                      color: isActive
+                        ? mode === 'max'
+                          ? '#080a0f'
+                          : '#ffffff'
+                        : '#cbd5e1',
+                      fontSize: '12px',
+                      fontWeight: isActive ? 700 : 500,
+                      cursor: 'pointer',
+                      textTransform: 'capitalize',
+                      boxShadow: isActive ? '0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15)' : '0 1px 2px rgba(0, 0, 0, 0.2)',
+                      transition: 'background-color 150ms ease, border-color 150ms ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) e.currentTarget.style.backgroundColor = '#1c2230';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) e.currentTarget.style.backgroundColor = '#151923';
+                    }}
+                  >
+                    {mode === 'max' ? '★ Max' : mode}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Depth Slider */}
@@ -215,7 +238,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 <label htmlFor="settings-depth-slider" style={{ color: '#94a3b8', cursor: 'pointer' }}>
                   Target Depth (Up to Max Level 30)
                 </label>
-                <span className="tabular-nums" style={{ fontWeight: 700, color: depth >= 24 ? '#a78bfa' : '#38bdf8' }}>
+                <span className="tabular-nums" style={{ fontWeight: 700, color: depth >= 24 ? '#c8aa6e' : '#f8fafc' }}>
                   {depth}
                 </span>
               </div>
@@ -227,14 +250,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 value={depth}
                 onChange={(e) => setDepth(parseInt(e.target.value, 10))}
                 aria-label="Target engine calculation depth"
-                style={{ width: '100%', accentColor: depth >= 24 ? '#7c3aed' : '#2563eb', cursor: 'pointer' }}
+                style={{ width: '100%', accentColor: depth >= 24 ? '#c8aa6e' : '#2563eb', cursor: 'pointer' }}
               />
             </div>
           </div>
 
           {/* Audio & Visual Toggles */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: '#94a3b8' }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: '#94a3b8' }}>
               Preferences
             </div>
 
@@ -243,7 +266,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
             >
               <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Eye size={16} color="#38bdf8" aria-hidden="true" />
+                <Eye size={16} color="#94a3b8" aria-hidden="true" />
                 Show Best Move &amp; Blunder Arrows
               </span>
               <input
@@ -251,7 +274,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 type="checkbox"
                 checked={showArrows}
                 onChange={(e) => setShowArrows(e.target.checked)}
-                style={{ accentColor: '#2563eb', transform: 'scale(1.2)', cursor: 'pointer' }}
+                style={{ accentColor: '#2563eb', transform: 'scale(1.15)', cursor: 'pointer' }}
               />
             </label>
 
@@ -272,7 +295,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 type="checkbox"
                 checked={soundEnabled}
                 onChange={(e) => setSoundEnabled(e.target.checked)}
-                style={{ accentColor: '#2563eb', transform: 'scale(1.2)', cursor: 'pointer' }}
+                style={{ accentColor: '#2563eb', transform: 'scale(1.15)', cursor: 'pointer' }}
               />
             </label>
           </div>
@@ -281,4 +304,3 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
     </div>
   );
 };
-

@@ -21,29 +21,27 @@ export const PlayerHeader: React.FC<PlayerHeaderProps> = ({
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '8px 14px',
-        backgroundColor: isTurn ? 'rgba(30, 41, 59, 0.75)' : 'rgba(15, 23, 42, 0.65)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderRadius: '10px',
-        border: isTurn ? '1px solid rgba(56, 189, 248, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
+        backgroundColor: isTurn ? '#151923' : '#0f121a',
+        borderRadius: '8px',
+        border: isTurn ? '1px solid rgba(200, 170, 110, 0.4)' : '1px solid rgba(255, 255, 255, 0.08)',
         boxShadow: isTurn
-          ? '0 4px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(56, 189, 248, 0.2)'
-          : '0 4px 12px rgba(0, 0, 0, 0.3)',
+          ? '0 2px 8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06)'
+          : '0 1px 3px rgba(0, 0, 0, 0.4)',
         width: '100%',
         maxWidth: '640px',
-        transition: 'background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
+        transition: 'background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, overflow: 'hidden' }}>
         <div
           aria-hidden="true"
           style={{
-            width: '18px',
-            height: '18px',
+            width: '16px',
+            height: '16px',
             borderRadius: '50%',
-            backgroundColor: isWhite ? '#f8fafc' : '#0f172a',
-            border: isWhite ? '2px solid #94a3b8' : '2px solid #475569',
-            boxShadow: isWhite ? '0 0 8px rgba(255, 255, 255, 0.4)' : 'inset 0 0 4px rgba(0, 0, 0, 0.8)',
+            backgroundColor: isWhite ? '#f8fafc' : '#080a0f',
+            border: isWhite ? '1.5px solid #cbd5e1' : '1.5px solid #475569',
+            boxShadow: isWhite ? '0 1px 2px rgba(0, 0, 0, 0.4)' : 'inset 0 1px 2px rgba(0, 0, 0, 0.8)',
             flexShrink: 0,
           }}
         />
@@ -55,7 +53,7 @@ export const PlayerHeader: React.FC<PlayerHeaderProps> = ({
               backgroundColor: '#e11d48',
               color: '#ffffff',
               padding: '1px 5px',
-              borderRadius: '4px',
+              borderRadius: '3px',
               letterSpacing: '0.4px',
               flexShrink: 0,
             }}
@@ -66,7 +64,7 @@ export const PlayerHeader: React.FC<PlayerHeaderProps> = ({
         <span
           style={{
             fontSize: '13px',
-            fontWeight: 800,
+            fontWeight: 700,
             color: '#f8fafc',
             letterSpacing: '-0.2px',
             overflow: 'hidden',
@@ -98,15 +96,14 @@ export const PlayerHeader: React.FC<PlayerHeaderProps> = ({
           aria-live="polite"
           style={{
             fontSize: '10px',
-            fontWeight: 800,
+            fontWeight: 700,
             textTransform: 'uppercase',
-            color: '#38bdf8',
-            backgroundColor: 'rgba(56, 189, 248, 0.15)',
-            border: '1px solid rgba(56, 189, 248, 0.35)',
-            padding: '2px 8px',
-            borderRadius: '12px',
+            color: '#c8aa6e',
+            backgroundColor: 'rgba(200, 170, 110, 0.12)',
+            border: '1px solid rgba(200, 170, 110, 0.3)',
+            padding: '2px 7px',
+            borderRadius: '4px',
             letterSpacing: '0.5px',
-            boxShadow: '0 0 8px rgba(56, 189, 248, 0.3)',
             flexShrink: 0,
             marginLeft: '8px',
           }}

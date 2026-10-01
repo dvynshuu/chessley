@@ -60,7 +60,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
     setTimeout(() => {
       setIsVisible(false);
       if (onComplete) onComplete();
-    }, 550);
+    }, 500);
   };
 
   // Keyboard dismiss (Space, Enter, Escape)
@@ -86,20 +86,15 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
-        backgroundColor: '#060911',
-        backgroundImage: `
-          radial-gradient(circle at 50% 45%, rgba(200, 170, 110, 0.14) 0%, transparent 60%),
-          radial-gradient(circle at 80% 20%, rgba(56, 189, 248, 0.05) 0%, transparent 40%),
-          radial-gradient(circle at 20% 80%, rgba(124, 58, 237, 0.05) 0%, transparent 40%)
-        `,
+        backgroundColor: '#080a0f',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         cursor: 'pointer',
         opacity: isFadingOut ? 0 : 1,
-        transition: 'opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)',
-        transform: isFadingOut ? 'scale(1.03)' : 'scale(1)',
+        transition: 'opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+        transform: isFadingOut ? 'scale(1.02)' : 'scale(1)',
         pointerEvents: isFadingOut ? 'none' : 'auto',
       }}
     >
@@ -109,19 +104,18 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
           position: 'absolute',
           top: '24px',
           right: '28px',
-          fontSize: '12px',
+          fontSize: '11px',
           fontWeight: 600,
-          color: 'rgba(148, 163, 184, 0.6)',
+          color: '#94a3b8',
           letterSpacing: '0.4px',
-          padding: '6px 14px',
-          borderRadius: '20px',
-          background: 'rgba(255, 255, 255, 0.04)',
+          padding: '6px 12px',
+          borderRadius: '6px',
+          background: '#0f121a',
           border: '1px solid rgba(255, 255, 255, 0.08)',
-          backdropFilter: 'blur(8px)',
-          transition: 'all 0.2s ease',
+          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.4)',
         }}
       >
-        Click anywhere to skip
+        Press Space or Click to skip
       </div>
 
       {/* Centerpiece Container */}
@@ -130,45 +124,35 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '20px',
+          gap: '24px',
           maxWidth: '460px',
           width: '90%',
           textAlign: 'center',
-          animation: 'fadeInScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+          animation: 'fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
         }}
       >
-        {/* Glowing Knight Emblem */}
+        {/* Architectural Knight Emblem Tile */}
         <div
           style={{
             position: 'relative',
-            width: '140px',
-            height: '140px',
+            width: '136px',
+            height: '136px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          {/* Ambient Glow Halo */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: '-20px',
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(200, 170, 110, 0.25) 0%, transparent 70%)',
-              animation: 'pulseAura 3s ease-in-out infinite alternate',
-            }}
-          />
-
           <img
             src="/icons/icon-512x512.png"
             alt="Chessley Master Emblem"
-            width={130}
-            height={130}
+            width={128}
+            height={128}
             style={{
               objectFit: 'contain',
-              borderRadius: '32px',
-              boxShadow: '0 12px 36px rgba(0, 0, 0, 0.8), 0 0 24px rgba(200, 170, 110, 0.25)',
-              border: '1px solid rgba(200, 170, 110, 0.35)',
+              borderRadius: '24px',
+              boxShadow: '0 16px 40px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
+              border: '1px solid rgba(200, 170, 110, 0.3)',
+              backgroundColor: '#0f121a',
               zIndex: 2,
             }}
           />
@@ -178,16 +162,13 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
           <h1
             style={{
-              fontSize: '36px',
-              fontWeight: 800,
-              letterSpacing: '5px',
+              fontSize: '32px',
+              fontWeight: 900,
+              letterSpacing: '4px',
               textTransform: 'uppercase',
               margin: 0,
               fontFamily: "'Inter', sans-serif",
-              background: 'linear-gradient(180deg, #ffffff 10%, #dcdfe5 60%, #c8aa6e 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              textShadow: '0 2px 20px rgba(200, 170, 110, 0.2)',
+              color: '#f8fafc',
             }}
           >
             CHESSLEY
@@ -195,10 +176,10 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
 
           <div
             style={{
-              fontSize: '12px',
+              fontSize: '11px',
               fontWeight: 700,
               color: '#94a3b8',
-              letterSpacing: '2.5px',
+              letterSpacing: '2px',
               textTransform: 'uppercase',
             }}
           >
@@ -207,26 +188,26 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
         </div>
 
         {/* Loading Progress Bar & Status */}
-        <div style={{ width: '100%', marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ width: '100%', marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div
             style={{
               width: '100%',
               height: '4px',
-              backgroundColor: 'rgba(255, 255, 255, 0.07)',
+              backgroundColor: '#151923',
               borderRadius: '2px',
               overflow: 'hidden',
               position: 'relative',
               boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.5)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
             }}
           >
             <div
               style={{
                 width: `${progress}%`,
                 height: '100%',
-                background: 'linear-gradient(90deg, #c8aa6e, #f1f5f9)',
+                backgroundColor: '#c8aa6e',
                 borderRadius: '2px',
-                boxShadow: '0 0 10px rgba(200, 170, 110, 0.6)',
-                transition: 'width 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                transition: 'width 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
               }}
             />
           </div>
@@ -248,12 +229,8 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
       </div>
 
       <style>{`
-        @keyframes pulseAura {
-          0% { transform: scale(0.95); opacity: 0.6; }
-          100% { transform: scale(1.15); opacity: 1; }
-        }
         @keyframes fadeInScale {
-          0% { opacity: 0; transform: scale(0.92); }
+          0% { opacity: 0; transform: scale(0.95); }
           100% { opacity: 1; transform: scale(1); }
         }
       `}</style>

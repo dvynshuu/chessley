@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Chessley — Precision Chess.com Stockfish 19 Game Analyzer</title>
     <meta name="description" content="Lightning-fast, high-accuracy Chess.com and PGN game analysis powered by real Stockfish 19 WebAssembly in your browser." />
     
@@ -13,9 +13,10 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <meta name="theme-color" content="#060911" />
+    <meta name="theme-color" content="#080a0f" />
     <meta name="apple-mobile-web-app-title" content="Chessley" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
     <!-- Typography -->
@@ -29,22 +30,20 @@
         position: fixed;
         inset: 0;
         z-index: 99999;
-        background-color: #060911;
-        background-image: radial-gradient(circle at 50% 45%, rgba(200, 170, 110, 0.12) 0%, transparent 60%);
+        background-color: #080a0f;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justifyContent: center;
         font-family: 'Inter', -apple-system, sans-serif;
-        transition: opacity 0.4s ease;
+        transition: opacity 0.35s ease;
       }
       .preloader-emblem {
-        width: 100px;
-        height: 100px;
-        border-radius: 26px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(200, 170, 110, 0.2);
-        border: 1px solid rgba(200, 170, 110, 0.3);
-        animation: preloaderPulse 2s ease-in-out infinite alternate;
+        width: 88px;
+        height: 88px;
+        border-radius: 18px;
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(200, 170, 110, 0.4);
       }
       .preloader-title {
         margin-top: 18px;

@@ -1,5 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import {
+  ChevronFirst,
+  ChevronLast,
+  ChevronLeft,
+  ChevronRight,
+  Play,
+  Pause,
+} from 'lucide-react';
 
 interface BoardControlsProps {
   currentPly: number;
@@ -8,6 +15,7 @@ interface BoardControlsProps {
   onPrev: () => void;
   onNext: () => void;
   onLast: () => void;
+  autoplayIntervalMs?: number;
 }
 
 export const BoardControls: React.FC<BoardControlsProps> = ({
@@ -17,37 +25,32 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
   onPrev,
   onNext,
   onLast,
+  autoplayIntervalMs = 800,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // Auto-play interval
+  // Autoplay ticker
   useEffect(() => {
     if (!isPlaying) return;
 
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (currentPly >= totalPlies) {
       setIsPlaying(false);
       return;
     }
 
     const timer = setInterval(() => {
-      if (currentPly < totalPlies) {
-        onNext();
-      } else {
-        setIsPlaying(false);
-      }
-    }, 1200);
+      onNext();
+    }, autoplayIntervalMs);
 
     return () => clearInterval(timer);
-  }, [isPlaying, currentPly, totalPlies, onNext]);
+  }, [isPlaying, currentPly, totalPlies, onNext, autoplayIntervalMs]);
 
-  // Keyboard navigation support
+  // Global Keyboard Shortcuts (Arrow keys & Space)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input or textarea
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      ) {
+      // Don't capture when typing in an input/textarea
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
         return;
       }
 
@@ -79,15 +82,13 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: 'rgba(15, 23, 42, 0.7)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderRadius: '10px',
+        backgroundColor: '#0f121a',
+        borderRadius: '8px',
         border: '1px solid rgba(255, 255, 255, 0.08)',
-        padding: '8px 14px',
+        padding: '8px 12px',
         width: '100%',
         maxWidth: '640px',
-        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.35)',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
       }}
     >
       <div style={{ display: 'flex', gap: '6px' }}>
@@ -98,12 +99,25 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
           title="First Move (Home)"
           aria-label="First move (Home)"
           style={{
-            padding: '8px 10px',
-            backgroundColor: 'rgba(30, 41, 59, 0.8)',
-            border: '1px solid rgba(255, 255, 255, 0.06)',
+            minWidth: '40px',
+            minHeight: '40px',
+            padding: '8px',
+            backgroundColor: currentPly === 0 ? '#121620' : '#1c2230',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
             borderRadius: '6px',
             color: currentPly === 0 ? '#475569' : '#f8fafc',
             cursor: currentPly === 0 ? 'default' : 'pointer',
+            boxShadow: currentPly === 0 ? 'none' : '0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+          onMouseEnter={(e) => {
+            if (currentPly > 0) e.currentTarget.style.backgroundColor = '#252b3d';
+          }}
+          onMouseLeave={(e) => {
+            if (currentPly > 0) e.currentTarget.style.backgroundColor = '#1c2230';
           }}
         >
           <ChevronFirst size={18} aria-hidden="true" />
@@ -116,12 +130,25 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
           title="Previous Move (←)"
           aria-label="Previous move (Left arrow)"
           style={{
-            padding: '8px 10px',
-            backgroundColor: 'rgba(30, 41, 59, 0.8)',
-            border: '1px solid rgba(255, 255, 255, 0.06)',
+            minWidth: '40px',
+            minHeight: '40px',
+            padding: '8px',
+            backgroundColor: currentPly === 0 ? '#121620' : '#1c2230',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
             borderRadius: '6px',
             color: currentPly === 0 ? '#475569' : '#f8fafc',
             cursor: currentPly === 0 ? 'default' : 'pointer',
+            boxShadow: currentPly === 0 ? 'none' : '0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+          onMouseEnter={(e) => {
+            if (currentPly > 0) e.currentTarget.style.backgroundColor = '#252b3d';
+          }}
+          onMouseLeave={(e) => {
+            if (currentPly > 0) e.currentTarget.style.backgroundColor = '#1c2230';
           }}
         >
           <ChevronLeft size={18} aria-hidden="true" />
@@ -133,17 +160,25 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
           title="Play / Pause (Space)"
           aria-label={isPlaying ? 'Pause autoplay (Space)' : 'Start autoplay (Space)'}
           style={{
-            padding: '8px 14px',
-            background: isPlaying
-              ? 'linear-gradient(135deg, #f59e0b, #d97706)'
-              : 'linear-gradient(135deg, #2563eb, #3b82f6)',
-            border: 'none',
+            minWidth: '44px',
+            minHeight: '40px',
+            padding: '8px 12px',
+            backgroundColor: isPlaying ? '#d97706' : '#2563eb',
+            border: isPlaying ? '1px solid #f59e0b' : '1px solid #3b82f6',
             borderRadius: '6px',
             color: '#ffffff',
             cursor: 'pointer',
-            boxShadow: isPlaying
-              ? '0 0 12px rgba(245, 158, 11, 0.4)'
-              : '0 0 12px rgba(37, 99, 235, 0.4)',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = isPlaying ? '#f59e0b' : '#3b82f6';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = isPlaying ? '#d97706' : '#2563eb';
           }}
         >
           {isPlaying ? <Pause size={18} aria-hidden="true" /> : <Play size={18} fill="#ffffff" aria-hidden="true" />}
@@ -156,12 +191,25 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
           title="Next Move (→)"
           aria-label="Next move (Right arrow)"
           style={{
-            padding: '8px 10px',
-            backgroundColor: 'rgba(30, 41, 59, 0.8)',
-            border: '1px solid rgba(255, 255, 255, 0.06)',
+            minWidth: '40px',
+            minHeight: '40px',
+            padding: '8px',
+            backgroundColor: currentPly >= totalPlies ? '#121620' : '#1c2230',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
             borderRadius: '6px',
             color: currentPly >= totalPlies ? '#475569' : '#f8fafc',
             cursor: currentPly >= totalPlies ? 'default' : 'pointer',
+            boxShadow: currentPly >= totalPlies ? 'none' : '0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+          onMouseEnter={(e) => {
+            if (currentPly < totalPlies) e.currentTarget.style.backgroundColor = '#252b3d';
+          }}
+          onMouseLeave={(e) => {
+            if (currentPly < totalPlies) e.currentTarget.style.backgroundColor = '#1c2230';
           }}
         >
           <ChevronRight size={18} aria-hidden="true" />
@@ -174,36 +222,50 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
           title="Last Move (End)"
           aria-label="Last move (End)"
           style={{
-            padding: '8px 10px',
-            backgroundColor: 'rgba(30, 41, 59, 0.8)',
-            border: '1px solid rgba(255, 255, 255, 0.06)',
+            minWidth: '40px',
+            minHeight: '40px',
+            padding: '8px',
+            backgroundColor: currentPly >= totalPlies ? '#121620' : '#1c2230',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
             borderRadius: '6px',
             color: currentPly >= totalPlies ? '#475569' : '#f8fafc',
             cursor: currentPly >= totalPlies ? 'default' : 'pointer',
+            boxShadow: currentPly >= totalPlies ? 'none' : '0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+          onMouseEnter={(e) => {
+            if (currentPly < totalPlies) e.currentTarget.style.backgroundColor = '#252b3d';
+          }}
+          onMouseLeave={(e) => {
+            if (currentPly < totalPlies) e.currentTarget.style.backgroundColor = '#1c2230';
           }}
         >
           <ChevronLast size={18} aria-hidden="true" />
         </button>
       </div>
 
-      {/* Move Info Pill */}
+      {/* Move Info Architectural Badge */}
       <div
         className="tabular-nums"
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          backgroundColor: 'rgba(30, 41, 59, 0.6)',
-          border: '1px solid rgba(255, 255, 255, 0.06)',
+          backgroundColor: '#151923',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
           padding: '4px 10px',
-          borderRadius: '20px',
+          borderRadius: '4px',
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: '12px',
           fontWeight: 700,
           color: '#e2e8f0',
+          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
         }}
       >
-        <span style={{ color: '#38bdf8' }}>Ply {currentPly}</span>
+        <span style={{ color: '#c8aa6e' }}>Ply {currentPly}</span>
         <span style={{ color: '#64748b' }}>/</span>
         <span style={{ color: '#94a3b8' }}>{totalPlies}</span>
       </div>

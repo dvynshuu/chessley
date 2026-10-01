@@ -28,18 +28,18 @@ export const EvaluationBar: React.FC<EvaluationBarProps> = ({
       aria-valuemin={0}
       aria-valuemax={100}
       style={{
-        width: '36px',
+        width: '34px',
         height: '100%',
         minHeight: '260px',
-        background: 'linear-gradient(to top, #0f172a, #1e293b)', // Black's fill
-        borderRadius: '10px',
+        backgroundColor: '#10141d', // Black's solid carbon fill
+        borderRadius: '8px',
         overflow: 'hidden',
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'flex-end',
-        border: '1px solid rgba(255, 255, 255, 0.14)',
-        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.4)',
+        border: '1px solid rgba(255, 255, 255, 0.12)',
+        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
         userSelect: 'none',
       }}
     >
@@ -60,8 +60,7 @@ export const EvaluationBar: React.FC<EvaluationBarProps> = ({
             left: '2px',
             right: '2px',
             height: '1px',
-            backgroundColor: 'rgba(255, 255, 255, 0.4)',
-            boxShadow: '0 0 4px rgba(0, 0, 0, 0.8)',
+            backgroundColor: 'rgba(255, 255, 255, 0.35)',
           }}
         />
         {/* +2 advantage mark (approx 35% from top) */}
@@ -72,7 +71,7 @@ export const EvaluationBar: React.FC<EvaluationBarProps> = ({
             left: '4px',
             width: '6px',
             height: '1px',
-            backgroundColor: 'rgba(255, 255, 255, 0.25)',
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
           }}
         />
         {/* -2 advantage mark (approx 65% from top) */}
@@ -83,7 +82,7 @@ export const EvaluationBar: React.FC<EvaluationBarProps> = ({
             left: '4px',
             width: '6px',
             height: '1px',
-            backgroundColor: 'rgba(255, 255, 255, 0.25)',
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
           }}
         />
       </div>
@@ -93,13 +92,12 @@ export const EvaluationBar: React.FC<EvaluationBarProps> = ({
         style={{
           width: '100%',
           height: `${displayPercent}%`,
-          background: 'linear-gradient(to top, #ffffff, #f1f5f9)',
-          transition: 'height 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
-          boxShadow: '0 -2px 10px rgba(255, 255, 255, 0.3)',
+          backgroundColor: '#f8fafc',
+          transition: 'height 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       />
 
-      {/* Floating Glass Score Text Badge */}
+      {/* Score Text Badge */}
       <div
         className="tabular-nums"
         style={{
@@ -121,10 +119,11 @@ export const EvaluationBar: React.FC<EvaluationBarProps> = ({
           borderRadius: '4px',
           backgroundColor:
             (orientation === 'w' ? isWhiteAdvantage : !isWhiteAdvantage)
-              ? 'rgba(15, 23, 42, 0.85)'
-              : 'rgba(255, 255, 255, 0.9)',
-          color: (orientation === 'w' ? isWhiteAdvantage : !isWhiteAdvantage) ? '#f8fafc' : '#0f172a',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
+              ? '#080a0f'
+              : '#ffffff',
+          color: (orientation === 'w' ? isWhiteAdvantage : !isWhiteAdvantage) ? '#f8fafc' : '#080a0f',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.5)',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
           pointerEvents: 'none',
           letterSpacing: '-0.3px',
           zIndex: 10,
@@ -133,7 +132,7 @@ export const EvaluationBar: React.FC<EvaluationBarProps> = ({
         {scoreText}
       </div>
 
-      {/* Pulsing indicator when Stockfish is actively calculating */}
+      {/* Active calculation indicator */}
       {isAnalyzing && (
         <div
           aria-hidden="true"
@@ -141,12 +140,12 @@ export const EvaluationBar: React.FC<EvaluationBarProps> = ({
             position: 'absolute',
             top: '4px',
             right: '4px',
-            width: '6px',
-            height: '6px',
+            width: '5px',
+            height: '5px',
             borderRadius: '50%',
             backgroundColor: '#10b981',
-            boxShadow: '0 0 8px #10b981',
-            animation: 'pulse 1s infinite',
+            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.4)',
+            animation: 'pulse 1.2s infinite',
             zIndex: 15,
           }}
         />
