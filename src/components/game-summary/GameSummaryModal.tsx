@@ -279,26 +279,31 @@ export const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
             <div style={{ fontSize: '13px', fontWeight: 700, color: '#94a3b8', marginBottom: '10px' }}>
               Phase Accuracy
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '11px', color: '#64748b' }}>Opening</div>
-                <div className="tabular-nums" style={{ fontSize: '14px', fontWeight: 800, marginTop: '2px' }}>
-                  W: {summary.openingAccuracy.w}% | B: {summary.openingAccuracy.b}%
+            {(() => {
+              const fmtAcc = (val: number) => (val > 0 ? `${val}%` : '—');
+              return (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '11px', color: '#64748b' }}>Opening</div>
+                    <div className="tabular-nums" style={{ fontSize: '14px', fontWeight: 800, marginTop: '2px' }}>
+                      W: {fmtAcc(summary.openingAccuracy.w)} | B: {fmtAcc(summary.openingAccuracy.b)}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '11px', color: '#64748b' }}>Middlegame</div>
+                    <div className="tabular-nums" style={{ fontSize: '14px', fontWeight: 800, marginTop: '2px' }}>
+                      W: {fmtAcc(summary.middlegameAccuracy.w)} | B: {fmtAcc(summary.middlegameAccuracy.b)}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '11px', color: '#64748b' }}>Endgame</div>
+                    <div className="tabular-nums" style={{ fontSize: '14px', fontWeight: 800, marginTop: '2px' }}>
+                      W: {fmtAcc(summary.endgameAccuracy.w)} | B: {fmtAcc(summary.endgameAccuracy.b)}
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '11px', color: '#64748b' }}>Middlegame</div>
-                <div className="tabular-nums" style={{ fontSize: '14px', fontWeight: 800, marginTop: '2px' }}>
-                  W: {summary.middlegameAccuracy.w}% | B: {summary.middlegameAccuracy.b}%
-                </div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '11px', color: '#64748b' }}>Endgame</div>
-                <div className="tabular-nums" style={{ fontSize: '14px', fontWeight: 800, marginTop: '2px' }}>
-                  W: {summary.endgameAccuracy.w}% | B: {summary.endgameAccuracy.b}%
-                </div>
-              </div>
-            </div>
+              );
+            })()}
           </div>
 
           {/* Critical Moments Carousel */}

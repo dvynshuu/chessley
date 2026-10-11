@@ -205,6 +205,11 @@ export class EngineManager {
         onInfo: options.onInfo,
         signal: options.signal,
       });
+    } catch (err) {
+      if (options.signal?.aborted) {
+        await worker.stop().catch(() => {});
+      }
+      throw err;
     } finally {
       this.releaseWorker(worker);
     }

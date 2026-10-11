@@ -1,7 +1,8 @@
 import { EngineAnalysisResult, EngineConfig, EngineInfo, ENGINE_PRESETS } from './EngineTypes';
 import { UciParser } from './UciParser';
 import { normalizeToWhitePerspective } from '../../chess/EvaluationUtils';
-import { PieceColor } from '../../chess/types';
+import { EngineScore, PieceColor } from '../../chess/types';
+import { Chess } from 'chess.js';
 
 export class StockfishClient {
   private worker: Worker | null = null;
@@ -152,6 +153,51 @@ export class StockfishClient {
       signal?: AbortSignal;
     } = {}
   ): Promise<EngineAnalysisResult> {
+    // Fast path: Check for terminal position (Checkmate, Stalemate, Draw)
+    try {
+      const chess = new Chess(fen);
+      if (chess.isGameOver()) {
+        const sideToMove: PieceColor = chess.turn() as PieceColor;
+        let score: EngineScore;
+        let normalizedScore: EngineScore;
+
+        if (chess.isCheckmate()) {
+          // The side to move has been checkmated (-0)
+          score = { type: 'mate', value: -0 };
+          normalizedScore = sideToMove === 'b' ? { type: 'mate', value: 0 } : { type: 'mate', value: -0 };
+        } else {
+          // Stalemate, 50-move rule, insufficient material, repetition
+          score = { type: 'cp', value: 0 };
+          normalizedScore = { type: 'cp', value: 0 };
+        }
+
+        const terminalResult: EngineAnalysisResult = {
+          fen,
+          sideToMove,
+          bestMove: '',
+          score,
+          normalizedScore,
+          depth: 99,
+          nodes: 0,
+          nps: 0,
+          timeMs: 0,
+          principalVariation: [],
+          multiPvLines: [
+            {
+              depth: 99,
+              multipv: 1,
+              score,
+              pv: [],
+            },
+          ],
+        };
+        options.onInfo?.(terminalResult.multiPvLines[0]);
+        return terminalResult;
+      }
+    } catch {
+      // Fallback to engine if FEN is non-standard
+    }
+
     if (!this.isReady) {
       await this.init();
     }
@@ -233,7 +279,10 @@ export class StockfishClient {
 
           const parsed = UciParser.parseBestMoveLine(line);
           const bestMove = parsed?.bestMove || (topInfo?.pv?.[0] ?? '');
-          const score = topInfo?.score || { type: 'cp', value: 0 };
+          let score = topInfo?.score || { type: 'cp', value: 0 };
+          if (score.type === 'mate' && score.value === 0) {
+            score = { type: 'mate', value: -0 };
+          }
           const normalizedScore = normalizeToWhitePerspective(score, sideToMove);
 
           const result: EngineAnalysisResult = {
@@ -289,7 +338,7 @@ export class StockfishClient {
       const timer = setTimeout(done, 1200);
 
       const listener = (line: string) => {
-        if (line.startsWith('bestmove ') || line.includes('readyok')) {
+        if (line.includes('readyok')) {
           done();
         }
       };

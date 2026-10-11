@@ -53,8 +53,14 @@ export class UciParser {
       }
     }
 
-    if (!score || depth === 0) {
+    // Accept score even at depth 0 if it is a terminal mate or evaluation
+    if (!score || (depth === 0 && score.type !== 'mate')) {
       return null;
+    }
+
+    // In UCI, if score is mate 0, the side to move has been checkmated (loss: -0)
+    if (score.type === 'mate' && score.value === 0) {
+      score = { type: 'mate', value: -0 };
     }
 
     return {
@@ -80,8 +86,12 @@ export class UciParser {
 
     const tokens = line.trim().split(/\s+/);
     const bestMove = tokens[1];
-    if (!bestMove || bestMove === '(none)') {
+    if (!bestMove) {
       return null;
+    }
+
+    if (bestMove === '(none)') {
+      return { bestMove: '', ponder: undefined };
     }
 
     let ponder: string | undefined;

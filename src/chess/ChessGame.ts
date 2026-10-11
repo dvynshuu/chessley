@@ -36,11 +36,18 @@ export class ChessGameModel {
     const chess = new Chess();
     const cleanPgn = rawPgn.trim();
 
+    // Check if raw input is a pure FEN string
+    const fenPattern = /^([rnbqkpRNBQKP1-8]+\/){7}[rnbqkpRNBQKP1-8]+(\s+[wb])(\s+[-KQkq]+)?(\s+[-a-h1-8]+)?(\s+\d+)?(\s+\d+)?/;
+    let pgnToLoad = cleanPgn;
+    if (fenPattern.test(cleanPgn)) {
+      pgnToLoad = `[SetUp "1"]\n[FEN "${cleanPgn}"]\n*`;
+    }
+
     try {
-      chess.loadPgn(cleanPgn);
+      chess.loadPgn(pgnToLoad);
     } catch {
       // In case PGN has non-standard trailing characters or annotations, try standardizing
-      const sanitized = cleanPgn.replace(/\[%[^\]]+\]/g, ''); // strip Chess.com clock bracket annotations for parser
+      const sanitized = pgnToLoad.replace(/\[%[^\]]+\]/g, ''); // strip Chess.com clock bracket annotations for parser
       chess.loadPgn(sanitized);
     }
 
@@ -67,7 +74,16 @@ export class ChessGameModel {
 
     const moves: ChessMove[] = history.map((m, index) => {
       const ply = index + 1;
-      const moveNumber = Math.floor(index / 2) + 1;
+      let moveNumber = Math.floor(index / 2) + 1;
+      if (m.before) {
+        const parts = m.before.split(' ');
+        if (parts.length >= 6) {
+          const fn = parseInt(parts[5], 10);
+          if (!isNaN(fn)) {
+            moveNumber = fn;
+          }
+        }
+      }
       const uci = `${m.from}${m.to}${m.promotion ? m.promotion.toLowerCase() : ''}`;
 
       return {
@@ -104,7 +120,8 @@ export class ChessGameModel {
 
   private reconstructInstances() {
     this.chessInstances = [];
-    const root = new Chess();
+    const initialFen = this.game.metadata?.['FEN'] || undefined;
+    const root = new Chess(initialFen);
     this.chessInstances.push(root);
 
     for (const move of this.game.moves) {
@@ -125,7 +142,7 @@ export class ChessGameModel {
 
   public getFenAtPly(ply: number): string {
     if (ply <= 0 || this.chessInstances.length === 0) {
-      return new Chess().fen();
+      return this.chessInstances[0]?.fen() || (this.game.metadata?.['FEN'] || new Chess().fen());
     }
     const idx = Math.min(ply, this.chessInstances.length - 1);
     return this.chessInstances[idx].fen();
@@ -152,5 +169,23 @@ export class ChessGameModel {
     const idx = Math.min(Math.max(0, ply), this.chessInstances.length - 1);
     const inst = this.chessInstances[idx];
     return inst ? inst.inCheck() : false;
+  }
+
+  public isCheckmate(ply: number): boolean {
+    const idx = Math.min(Math.max(0, ply), this.chessInstances.length - 1);
+    const inst = this.chessInstances[idx];
+    return inst ? inst.isCheckmate() : false;
+  }
+
+  public isDraw(ply: number): boolean {
+    const idx = Math.min(Math.max(0, ply), this.chessInstances.length - 1);
+    const inst = this.chessInstances[idx];
+    return inst ? inst.isDraw() : false;
+  }
+
+  public isThreefoldRepetition(ply: number): boolean {
+    const idx = Math.min(Math.max(0, ply), this.chessInstances.length - 1);
+    const inst = this.chessInstances[idx];
+    return inst ? inst.isThreefoldRepetition() : false;
   }
 }

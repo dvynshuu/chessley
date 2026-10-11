@@ -14,28 +14,41 @@ export class AnalysisCache {
     return AnalysisCache.instance;
   }
 
-  private makeKey(fen: string, depth: number): string {
-    return `${this.ENGINE_VERSION}_d${depth}_${fen}`;
+  private makeKey(fen: string): string {
+    // Normalize FEN to 4 positional components (board, active, castling, en-passant) for transposition hits
+    const tokens = fen.trim().split(/\s+/);
+    const normalized = tokens.length >= 4 ? tokens.slice(0, 4).join(' ') : fen;
+    return `${this.ENGINE_VERSION}_${normalized}`;
   }
 
-  public async get(fen: string, minDepth: number): Promise<EngineAnalysisResult | null> {
-    const key = this.makeKey(fen, minDepth);
+  public async get(fen: string, minDepth: number, minMultiPv = 1): Promise<EngineAnalysisResult | null> {
+    const key = this.makeKey(fen);
 
     // 1. Check in-memory LRU
     if (this.memoryLru.has(key)) {
-      const result = this.memoryLru.get(key)!;
-      // Refresh LRU order
-      this.memoryLru.delete(key);
-      this.memoryLru.set(key, result);
-      return result;
+      const cached = this.memoryLru.get(key)!;
+      const depthOk = (cached.depth || 0) >= minDepth;
+      const multiPvOk = (cached.multiPvLines?.length || 1) >= minMultiPv;
+
+      if (depthOk && multiPvOk) {
+        // Refresh LRU order
+        this.memoryLru.delete(key);
+        this.memoryLru.set(key, cached);
+        return cached;
+      }
     }
 
     // 2. Check IndexedDB persistent store
     try {
       const stored = await idbGet<EngineAnalysisResult>(key);
       if (stored) {
-        this.addToMemory(key, stored);
-        return stored;
+        const depthOk = (stored.depth || 0) >= minDepth;
+        const multiPvOk = (stored.multiPvLines?.length || 1) >= minMultiPv;
+
+        if (depthOk && multiPvOk) {
+          this.addToMemory(key, stored);
+          return stored;
+        }
       }
     } catch {
       // Ignore IDB errors in incognito or restricted environments
@@ -45,7 +58,14 @@ export class AnalysisCache {
   }
 
   public async set(fen: string, depth: number, result: EngineAnalysisResult): Promise<void> {
-    const key = this.makeKey(fen, depth);
+    const key = this.makeKey(fen);
+
+    // Do not overwrite higher depth calculation with lower depth
+    const existing = this.memoryLru.get(key);
+    if (existing && existing.depth > depth && existing.multiPvLines.length >= result.multiPvLines.length) {
+      return;
+    }
+
     this.addToMemory(key, result);
 
     try {

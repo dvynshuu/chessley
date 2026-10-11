@@ -31,27 +31,49 @@ const PIECE_VALUES: Record<string, number> = {
  */
 export function isMaterialSacrifice(
   move: ChessMove,
-  fenBefore: string
+  _fenBefore?: string
 ): boolean {
+  if (move.ply <= 4) return false;
+  const movingPiece = move.piece.toLowerCase();
+  if (movingPiece === 'k') return false; // King moves are not sacrifices
+
   try {
-    const chess = new Chess(fenBefore);
-    const movingPiece = move.piece.toLowerCase();
     const movingPieceVal = PIECE_VALUES[movingPiece] || 0;
     const capturedPieceVal = move.captured ? (PIECE_VALUES[move.captured.toLowerCase()] || 0) : 0;
 
-    // A sacrifice must give up more material than it immediately captures
-    if (movingPieceVal <= capturedPieceVal && movingPieceVal <= 1) {
-      return false; // Pawn pushes or equal/favorable captures are not sacrifices
+    const chessAfter = new Chess(move.fenAfter);
+    const opponentColor: PieceColor = move.color === 'w' ? 'b' : 'w';
+
+    // Check if the destination square is attacked by opponent in the resulting position
+    const isAttackedByOpponent = chessAfter.isAttacked(move.to as any, opponentColor);
+    const isDefendedByPlayer = chessAfter.isAttacked(move.to as any, move.color);
+
+    // 1. Move into an undefended square attacked by opponent with net material down
+    if (isAttackedByOpponent && !isDefendedByPlayer && movingPieceVal > capturedPieceVal) {
+      return true;
     }
 
-    // Check if the destination square is attacked by opponent
-    const opponentColor: PieceColor = move.color === 'w' ? 'b' : 'w';
-    // Square square is attacked by opponent?
-    const isAttacked = chess.isAttacked(move.to as any, opponentColor);
+    // 2. Move into a defended square, but opponent can capture with a lower-value piece
+    if (isAttackedByOpponent && isDefendedByPlayer) {
+      const oppLegalMoves = chessAfter.moves({ verbose: true });
+      const captureOfMovedPiece = oppLegalMoves.find((m) => m.to === move.to && m.captured);
+      if (captureOfMovedPiece) {
+        const capturingPieceVal = PIECE_VALUES[captureOfMovedPiece.piece.toLowerCase()] || 0;
+        if (capturingPieceVal < movingPieceVal) {
+          return true; // e.g. Queen or Rook attacked by pawn/minor piece
+        }
+      }
+    }
 
-    if (isAttacked && movingPieceVal > capturedPieceVal) {
-      // Piece is sacrificed to an attacked square without full immediate material return
-      return true;
+    // 3. Sacrificed a different major piece (e.g. quiet move leaving Queen or Rook hanging)
+    const oppMoves = chessAfter.moves({ verbose: true });
+    for (const om of oppMoves) {
+      if (om.captured && (om.captured === 'q' || om.captured === 'r')) {
+        const targetSq = om.to;
+        if (!chessAfter.isAttacked(targetSq as any, move.color)) {
+          return true; // Heavy piece left completely hanging
+        }
+      }
     }
 
     return false;
@@ -70,52 +92,70 @@ export function classifyMove(
   winProbBefore: number,
   winProbAfter: number,
   winProbLoss: number,
-  config: ClassificationConfig = DEFAULT_CLASSIFICATION_CONFIG
+  config: ClassificationConfig = DEFAULT_CLASSIFICATION_CONFIG,
+  pvGapCp?: number,
+  isBookMove?: boolean
 ): MoveClassification {
-  const isBestMove = playedUci.toLowerCase() === bestUci.toLowerCase() || winProbLoss <= 0.3;
+  const isExactBest = playedUci.toLowerCase() === bestUci.toLowerCase();
+  const isBestMove = isExactBest || winProbLoss <= 0.2;
 
-  // 1. Brilliant move check:
-  // Must be best move, must maintain a strong or winning position (>= 50%),
+  // 1. Explicit Opening Book move
+  if (isBookMove) {
+    return 'book';
+  }
+
+  // 2. Brilliant move check:
+  // Must be top engine move, must maintain a strong position (>= 50%),
   // and involves a genuine piece sacrifice
-  if (isBestMove && winProbAfter >= 50 && winProbLoss <= 0.5) {
+  if (isBestMove && winProbAfter >= 50 && winProbLoss <= 0.5 && move.ply > 4) {
     if (isMaterialSacrifice(move, move.fenBefore)) {
       return 'brilliant';
     }
   }
 
-  // 2. Missed win / Missed Opportunity:
-  // Player had a decisive advantage (>= 75% win probability) or opponent blundered,
-  // but player's move drops the win probability down to <= 55%
-  if (winProbBefore >= 75 && winProbAfter <= 55 && winProbLoss >= 15) {
+  // 3. Great move check:
+  // The only winning/saving move in a difficult position (tactical singularity)
+  if (
+    isBestMove &&
+    ((pvGapCp !== undefined && pvGapCp >= 150) ||
+      (winProbBefore <= 45 && winProbAfter >= 52 && winProbLoss <= 0.2 && move.ply > 6))
+  ) {
+    return 'great';
+  }
+
+  // 4. Missed win / Missed Opportunity:
+  // Player had a decisive advantage (>= 70% win probability),
+  // but dropped it by >= 20% or down to <= 55%
+  if (winProbBefore >= 70 && (winProbLoss >= 20 || winProbAfter <= 55)) {
     return 'missed_win';
   }
 
-  // 3. Best move
+  // 5. Best move
   if (isBestMove) {
     return 'best';
   }
 
-  // 4. Excellent move
+  // 6. Excellent move
   if (winProbLoss <= config.excellentThreshold) {
     return 'excellent';
   }
 
-  // 5. Good move
+  // 7. Good move
   if (winProbLoss <= config.goodThreshold) {
     return 'good';
   }
 
-  // 6. Inaccuracy
+  // 8. Inaccuracy
   if (winProbLoss <= config.mistakeThreshold) {
     return 'inaccuracy';
   }
 
-  // 7. Mistake
+  // 9. Mistake
   if (winProbLoss <= config.blunderThreshold) {
     return 'mistake';
   }
 
-  // 8. Blunder
+  // 10. Blunder
   return 'blunder';
 }
 

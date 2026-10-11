@@ -175,6 +175,28 @@ export class AnalysisScheduler {
           .filter((a) => a.classification === 'blunder' || a.classification === 'mistake' || a.classification === 'missed_win')
           .map((a) => a.ply);
 
+        const deepEvalPromiseMap = new Map<string, Promise<EngineAnalysisResult>>();
+        const getDeepEval = (targetFen: string): Promise<EngineAnalysisResult> => {
+          if (deepEvalPromiseMap.has(targetFen)) {
+            return deepEvalPromiseMap.get(targetFen)!;
+          }
+          const p = (async () => {
+            let res = await this.cache.get(targetFen, pass2Depth);
+            if (!res) {
+              res = await this.engineManager.analyzeBackground(targetFen, {
+                depth: pass2Depth,
+                timeMs: pass2TimeMs,
+                signal,
+              });
+              await this.cache.set(targetFen, pass2Depth, res);
+            }
+            this.positionEvaluations.set(targetFen, res);
+            return res;
+          })();
+          deepEvalPromiseMap.set(targetFen, p);
+          return p;
+        };
+
         let criticalIdx = 0;
         const runWorkerPass2 = async () => {
           while (criticalIdx < criticalPlies.length) {
@@ -190,27 +212,11 @@ export class AnalysisScheduler {
             const move = game.moves[ply - 1];
             if (!move) continue;
 
-            // Deep evaluate before position
-            let deepBefore = await this.cache.get(move.fenBefore, pass2Depth);
-            if (!deepBefore) {
-              deepBefore = await this.engineManager.analyzeBackground(move.fenBefore, {
-                depth: pass2Depth,
-                timeMs: pass2TimeMs,
-                signal,
-              });
-              await this.cache.set(move.fenBefore, pass2Depth, deepBefore);
-            }
-
-            // Deep evaluate after position
-            let deepAfter = await this.cache.get(move.fenAfter, pass2Depth);
-            if (!deepAfter) {
-              deepAfter = await this.engineManager.analyzeBackground(move.fenAfter, {
-                depth: pass2Depth,
-                timeMs: pass2TimeMs,
-                signal,
-              });
-              await this.cache.set(move.fenAfter, pass2Depth, deepAfter);
-            }
+            // Deep evaluate before and after position with deduplication
+            const [deepBefore, deepAfter] = await Promise.all([
+              getDeepEval(move.fenBefore),
+              getDeepEval(move.fenAfter),
+            ]);
 
             const refined = GameAnalyzer.evaluateMove(game, ply, deepBefore, deepAfter);
             this.analyses[ply] = refined;

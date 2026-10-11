@@ -50,4 +50,37 @@ describe('ChessGameModel & PGN', () => {
     // 20 standard initial legal moves
     expect(initialMoves.length).toBe(20);
   });
+
+  it('correctly parses custom starting FEN and preserves move numbering', () => {
+    const customPgn = `
+[Event "Endgame Study"]
+[SetUp "1"]
+[FEN "8/8/4k3/8/8/4K3/4P3/8 w - - 0 35"]
+
+35. Ke4 Kf6 36. Kd5 *
+`;
+    const model = new ChessGameModel(customPgn);
+    expect(model.totalPlies).toBe(3);
+    expect(model.getFenAtPly(0)).toBe('8/8/4k3/8/8/4K3/4P3/8 w - - 0 35');
+    
+    const move1 = model.getMoveAtPly(1);
+    expect(move1?.moveNumber).toBe(35);
+    expect(move1?.san).toBe('Ke4');
+
+    const move2 = model.getMoveAtPly(2);
+    expect(move2?.moveNumber).toBe(35);
+    expect(move2?.san).toBe('Kf6');
+
+    const move3 = model.getMoveAtPly(3);
+    expect(move3?.moveNumber).toBe(36);
+    expect(move3?.san).toBe('Kd5');
+  });
+
+  it('correctly loads raw FEN string directly', () => {
+    const rawFen = 'r1bqkb1r/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3';
+    const model = new ChessGameModel(rawFen);
+    expect(model.getFenAtPly(0)).toBe(rawFen);
+    expect(model.totalPlies).toBe(0);
+    expect(model.getLegalMovesAtPly(0).length).toBeGreaterThan(0);
+  });
 });

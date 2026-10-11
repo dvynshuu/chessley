@@ -21,14 +21,41 @@ export class GameAnalyzer {
     const bestScoreBefore = evalBefore.normalizedScore;
     const playedScoreAfter = evalAfter.normalizedScore;
 
+    const playedUci = move.uci;
+    const bestUci = evalBefore.bestMove;
+    const isEngineBest = playedUci.toLowerCase() === bestUci.toLowerCase();
+
     // Win probability from the player's perspective
     const winProbBefore = evaluationToWinProbability(bestScoreBefore, playerColor);
     const winProbAfter = evaluationToWinProbability(playedScoreAfter, playerColor);
 
-    const { winProbLoss, accuracy } = scoreLossToAccuracy(winProbBefore, winProbAfter);
+    let winProbLoss: number;
+    let accuracy: number;
 
-    const playedUci = move.uci;
-    const bestUci = evalBefore.bestMove;
+    if (isEngineBest) {
+      // Top engine recommendation must never be penalized by depth horizon noise
+      winProbLoss = 0;
+      accuracy = 100;
+    } else {
+      const res = scoreLossToAccuracy(winProbBefore, winProbAfter);
+      winProbLoss = res.winProbLoss;
+      accuracy = res.accuracy;
+    }
+
+    // Measure tactical singularity gap between 1st and 2nd engine lines if multiPV available
+    let pvGapCp: number | undefined;
+    if (evalBefore.multiPvLines && evalBefore.multiPvLines.length >= 2) {
+      const line1 = evalBefore.multiPvLines[0];
+      const line2 = evalBefore.multiPvLines[1];
+      if (line1 && line2 && line1.score.type === 'cp' && line2.score.type === 'cp') {
+        pvGapCp = Math.abs(line1.score.value - line2.score.value);
+      }
+    }
+
+    const isCheckmate = evalAfter.score.type === 'mate' && Math.abs(evalAfter.score.value) === 0;
+    const hasOpeningInfo = Boolean(game.eco || game.opening || game.metadata?.['ECO'] || game.metadata?.['Opening']);
+    const isBookCandidate = isEngineBest && !isCheckmate;
+    const isBookMove = isBookCandidate && move.ply <= 12 && hasOpeningInfo;
 
     const classification = classifyMove(
       move,
@@ -36,7 +63,10 @@ export class GameAnalyzer {
       bestUci,
       winProbBefore,
       winProbAfter,
-      winProbLoss
+      winProbLoss,
+      undefined,
+      pvGapCp,
+      isBookMove
     );
 
     // Convert best UCI move to SAN for clean UI display
@@ -162,27 +192,28 @@ export class GameAnalyzer {
       }
     }
 
-    const avg = (arr: number[]) => (arr.length === 0 ? 100 : Math.round((arr.reduce((s, x) => s + x, 0) / arr.length) * 10) / 10);
+    const avg = (arr: number[], emptyVal = 100) =>
+      arr.length === 0 ? emptyVal : Math.round((arr.reduce((s, x) => s + x, 0) / arr.length) * 10) / 10;
 
     return {
-      whiteAccuracy: avg(accuraciesW),
-      blackAccuracy: avg(accuraciesB),
+      whiteAccuracy: avg(accuraciesW, 100),
+      blackAccuracy: avg(accuraciesB, 100),
       totalPlies: game.moves.length,
       classificationCounts: {
         w: countsW,
         b: countsB,
       },
       openingAccuracy: {
-        w: avg(openingW),
-        b: avg(openingB),
+        w: avg(openingW, 0),
+        b: avg(openingB, 0),
       },
       middlegameAccuracy: {
-        w: avg(middleW),
-        b: avg(middleB),
+        w: avg(middleW, 0),
+        b: avg(middleB, 0),
       },
       endgameAccuracy: {
-        w: avg(endW),
-        b: avg(endB),
+        w: avg(endW, 0),
+        b: avg(endB, 0),
       },
       criticalMoments,
     };

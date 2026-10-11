@@ -16,6 +16,7 @@ import { ExportModal } from '../components/export/ExportModal';
 import { SettingsModal } from '../components/settings/SettingsModal';
 import { SplashScreen } from '../components/ui/SplashScreen';
 import { FEATURED_GAMES } from '../integrations/chesscom/GameResolver';
+import { PieceColor } from '../chess/types';
 
 export const App: React.FC = () => {
   const {
@@ -96,16 +97,31 @@ export const App: React.FC = () => {
   const bottomColor = orientation === 'w' ? 'w' : 'b';
 
   // Whose turn is it at current ply?
-  const sideToMove = currentPly % 2 === 0 ? 'w' : 'b';
+  const sideToMove = (currentFen.split(' ')[1] as PieceColor) || (currentPly % 2 === 0 ? 'w' : 'b');
 
   // Last move from/to coordinates
   const lastMoveCoords = currentMove ? { from: currentMove.from, to: currentMove.to } : null;
 
-  // Best move recommendation (either from full analysis or interactive engine)
-  const bestMove = currentMoveAnalysis?.bestMove || interactiveResult?.bestMove || null;
+  // Next move analysis (if available from whole game analysis, evalBefore is currentFen's evaluation)
+  const nextMoveAnalysis = useMemo(
+    () => (currentPly < game.moves.length ? analyses[currentPly + 1] : null),
+    [analyses, currentPly, game.moves.length]
+  );
 
-  // Active evaluation score for display
-  const activeScore = interactiveResult?.normalizedScore || currentMoveAnalysis?.playedScoreAfter || null;
+  // Verify interactive engine evaluation matches the currently displayed board FEN
+  const isInteractiveMatchingFen = interactiveResult?.fen === currentFen;
+  const currentInteractiveResult = isInteractiveMatchingFen ? interactiveResult : null;
+  const currentInteractiveInfo = isInteractiveMatchingFen ? interactiveInfo : null;
+
+  // Best move recommendation for the board currently displayed:
+  // Prioritize live interactive evaluation of current position, then nextMoveAnalysis
+  const bestMove = currentInteractiveResult?.bestMove || nextMoveAnalysis?.bestMove || null;
+
+  // Active evaluation score for display (normalized to White perspective)
+  const activeScore =
+    currentInteractiveResult?.normalizedScore ||
+    (currentPly === 0 ? nextMoveAnalysis?.bestScoreBefore : currentMoveAnalysis?.playedScoreAfter) ||
+    null;
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'transparent' }}>
@@ -332,10 +348,11 @@ export const App: React.FC = () => {
             <div style={{ width: '100%' }}>
               {mobileTab === 'engine' && (
                 <EnginePanel
-                  interactiveResult={interactiveResult}
-                  interactiveInfo={interactiveInfo}
+                  interactiveResult={currentInteractiveResult}
+                  interactiveInfo={currentInteractiveInfo}
                   isEvaluating={isInteractiveEvaluating || analysisStatus === 'analyzing'}
                   currentMoveAnalysis={currentMoveAnalysis}
+                  nextMoveAnalysis={nextMoveAnalysis}
                   engineMode={engineMode}
                   onSetEngineMode={setEngineMode}
                 />
@@ -400,10 +417,11 @@ export const App: React.FC = () => {
         <section className="desktop-bay" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Real-time Engine Panel */}
           <EnginePanel
-            interactiveResult={interactiveResult}
-            interactiveInfo={interactiveInfo}
+            interactiveResult={currentInteractiveResult}
+            interactiveInfo={currentInteractiveInfo}
             isEvaluating={isInteractiveEvaluating || analysisStatus === 'analyzing'}
             currentMoveAnalysis={currentMoveAnalysis}
+            nextMoveAnalysis={nextMoveAnalysis}
             engineMode={engineMode}
             onSetEngineMode={setEngineMode}
           />

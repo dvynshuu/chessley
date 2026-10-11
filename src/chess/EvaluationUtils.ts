@@ -1,6 +1,13 @@
 import { EngineScore, PieceColor } from './types';
 
 /**
+ * Helper to determine if an EngineScore represents a negative value (including -0 for checkmate loss).
+ */
+export function isNegativeScore(score: EngineScore): boolean {
+  return score.value < 0 || Object.is(score.value, -0);
+}
+
+/**
  * Normalizes an engine score from the side-to-move's perspective
  * into standard White's perspective (positive = White winning, negative = Black winning).
  */
@@ -8,9 +15,15 @@ export function normalizeToWhitePerspective(score: EngineScore, sideToMove: Piec
   if (sideToMove === 'w') {
     return { ...score };
   }
+  const isNegZero = Object.is(score.value, -0);
+  const isPosZero = Object.is(score.value, 0);
+  let newVal = -score.value;
+  if (isPosZero) newVal = -0;
+  else if (isNegZero) newVal = 0;
+
   return {
     type: score.type,
-    value: -score.value,
+    value: newVal,
   };
 }
 
@@ -21,9 +34,15 @@ export function toPlayerPerspective(whiteScore: EngineScore, playerColor: PieceC
   if (playerColor === 'w') {
     return { ...whiteScore };
   }
+  const isNegZero = Object.is(whiteScore.value, -0);
+  const isPosZero = Object.is(whiteScore.value, 0);
+  let newVal = -whiteScore.value;
+  if (isPosZero) newVal = -0;
+  else if (isNegZero) newVal = 0;
+
   return {
     type: whiteScore.type,
-    value: -whiteScore.value,
+    value: newVal,
   };
 }
 
@@ -35,8 +54,10 @@ export function scoreToNumeric(score: EngineScore): number {
   if (score.type === 'cp') {
     return score.value;
   }
-  // For mate: M1 is better than M2, -M1 is worse than -M2
-  const sign = score.value >= 0 ? 1 : -1;
+  // For mate: M1 is better than M2, -M1 is worse than -M2.
+  // M0 is checkmate (+30000), -M0 is getting checkmated (-30000).
+  const isNeg = isNegativeScore(score);
+  const sign = isNeg ? -1 : 1;
   const distance = Math.abs(score.value);
   return sign * (30000 - Math.min(distance, 100) * 100);
 }
@@ -58,8 +79,12 @@ export function formatScore(score: EngineScore, perspective: PieceColor = 'w'): 
   const displayScore = perspective === 'w' ? score : toPlayerPerspective(score, 'b');
 
   if (displayScore.type === 'mate') {
-    const mateNum = displayScore.value;
-    return mateNum > 0 ? `M${mateNum}` : `-M${Math.abs(mateNum)}`;
+    const isNeg = isNegativeScore(displayScore);
+    const mateNum = Math.abs(displayScore.value);
+    if (mateNum === 0) {
+      return isNeg ? '-M0' : 'M0';
+    }
+    return isNeg ? `-M${mateNum}` : `M${mateNum}`;
   }
 
   const cp = displayScore.value / 100;
@@ -80,12 +105,13 @@ export function evaluationToWinProbability(whiteScore: EngineScore, player: Piec
   const score = player === 'w' ? whiteScore : toPlayerPerspective(whiteScore, 'b');
 
   if (score.type === 'mate') {
-    if (score.value > 0) {
-      // Winning mate: between 99.0% and 99.9% depending on distance
-      return Math.max(99.0, 100 - Math.min(score.value * 0.15, 1.0));
+    const isNeg = isNegativeScore(score);
+    if (!isNeg) {
+      // Winning mate: between 99.0% and 100% depending on distance
+      return Math.max(99.0, 100 - Math.min(Math.abs(score.value) * 0.15, 1.0));
     } else {
-      // Losing mate: between 0.1% and 1.0%
-      return Math.min(1.0, Math.max(0.1, Math.abs(score.value) * 0.15));
+      // Losing mate: between 0.0% and 1.0%
+      return Math.min(1.0, Math.max(0.0, Math.abs(score.value) * 0.15));
     }
   }
 
@@ -123,7 +149,8 @@ export function scoreLossToAccuracy(winProbBefore: number, winProbAfter: number)
  */
 export function getEvaluationBarPercentage(whiteScore: EngineScore): number {
   if (whiteScore.type === 'mate') {
-    return whiteScore.value > 0 ? 98 : 2;
+    const isNeg = isNegativeScore(whiteScore);
+    return isNeg ? 2 : 98;
   }
   // Clamp between -1000cp and +1000cp with non-linear ease for visual clarity
   const cp = Math.max(-1000, Math.min(1000, whiteScore.value));

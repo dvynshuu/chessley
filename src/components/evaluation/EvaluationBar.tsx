@@ -15,32 +15,36 @@ export const EvaluationBar: React.FC<EvaluationBarProps> = ({
 }) => {
   const currentScore = score || { type: 'cp', value: 0 };
   const whitePercent = getEvaluationBarPercentage(currentScore);
-  const displayPercent = orientation === 'w' ? whitePercent : 100 - whitePercent;
-  const scoreText = formatScore(currentScore, orientation);
+  const scoreText = formatScore(currentScore, 'w');
 
-  const isWhiteAdvantage = currentScore.type === 'mate' ? currentScore.value > 0 : currentScore.value >= 0;
+  const isWhiteLeading =
+    currentScore.type === 'mate'
+      ? currentScore.value > 0 || (currentScore.value === 0 && !Object.is(currentScore.value, -0))
+      : currentScore.value >= 0;
+
+  // Determine badge placement on the leading player's portion of the bar
+  const isBadgeAtBottom = orientation === 'w' ? isWhiteLeading : !isWhiteLeading;
 
   return (
     <div
       role="meter"
       aria-label={`Position evaluation: ${scoreText}`}
-      aria-valuenow={Math.round(displayPercent)}
+      aria-valuenow={Math.round(whitePercent)}
       aria-valuemin={0}
       aria-valuemax={100}
       style={{
         width: '34px',
         height: '100%',
         minHeight: '260px',
-        backgroundColor: '#10141d', // Black's solid carbon fill
         borderRadius: '8px',
         overflow: 'hidden',
         position: 'relative',
         display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
+        flexDirection: orientation === 'w' ? 'column' : 'column-reverse',
         border: '1px solid rgba(255, 255, 255, 0.12)',
         boxShadow: '0 4px 16px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
         userSelect: 'none',
+        backgroundColor: '#10141d',
       }}
     >
       {/* Advantage Tick Marks (±5, ±2, 0.00) */}
@@ -87,11 +91,21 @@ export const EvaluationBar: React.FC<EvaluationBarProps> = ({
         />
       </div>
 
-      {/* White portion of the evaluation bar */}
+      {/* Black block of the evaluation bar */}
       <div
         style={{
           width: '100%',
-          height: `${displayPercent}%`,
+          height: `${100 - whitePercent}%`,
+          backgroundColor: '#10141d',
+          transition: 'height 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+      />
+
+      {/* White block of the evaluation bar */}
+      <div
+        style={{
+          width: '100%',
+          height: `${whitePercent}%`,
           backgroundColor: '#f8fafc',
           transition: 'height 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
@@ -104,24 +118,15 @@ export const EvaluationBar: React.FC<EvaluationBarProps> = ({
           position: 'absolute',
           left: '3px',
           right: '3px',
-          [orientation === 'w'
-            ? isWhiteAdvantage
-              ? 'bottom'
-              : 'top'
-            : isWhiteAdvantage
-            ? 'top'
-            : 'bottom']: '6px',
+          [isBadgeAtBottom ? 'bottom' : 'top']: '6px',
           textAlign: 'center',
           fontSize: '11px',
           fontWeight: 800,
           fontFamily: "'JetBrains Mono', monospace",
           padding: '2px 0',
           borderRadius: '4px',
-          backgroundColor:
-            (orientation === 'w' ? isWhiteAdvantage : !isWhiteAdvantage)
-              ? '#080a0f'
-              : '#ffffff',
-          color: (orientation === 'w' ? isWhiteAdvantage : !isWhiteAdvantage) ? '#f8fafc' : '#080a0f',
+          backgroundColor: isWhiteLeading ? '#080a0f' : '#ffffff',
+          color: isWhiteLeading ? '#f8fafc' : '#080a0f',
           boxShadow: '0 1px 3px rgba(0, 0, 0, 0.5)',
           border: '1px solid rgba(255, 255, 255, 0.15)',
           pointerEvents: 'none',

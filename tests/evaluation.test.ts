@@ -3,6 +3,7 @@ import {
   normalizeToWhitePerspective,
   toPlayerPerspective,
   compareScores,
+  scoreToNumeric,
   formatScore,
   evaluationToWinProbability,
   scoreLossToAccuracy,
@@ -99,5 +100,28 @@ describe('EvaluationUtils', () => {
     expect(getEvaluationBarPercentage({ type: 'cp', value: 0 })).toBeCloseTo(50, 0);
     expect(getEvaluationBarPercentage({ type: 'mate', value: 1 })).toBe(98);
     expect(getEvaluationBarPercentage({ type: 'mate', value: -1 })).toBe(2);
+    expect(getEvaluationBarPercentage({ type: 'mate', value: 0 })).toBe(98);
+    expect(getEvaluationBarPercentage({ type: 'mate', value: -0 })).toBe(2);
+  });
+
+  it('correctly handles terminal checkmate M0 and signed zeroes', () => {
+    const mate0Win = { type: 'mate' as const, value: 0 };
+    const mate0Loss = { type: 'mate' as const, value: -0 };
+
+    // Format check
+    expect(formatScore(mate0Win)).toBe('M0');
+    expect(formatScore(mate0Loss)).toBe('-M0');
+
+    // Numeric conversion
+    expect(scoreToNumeric(mate0Win)).toBe(30000);
+    expect(scoreToNumeric(mate0Loss)).toBe(-30000);
+
+    // Win probability
+    expect(evaluationToWinProbability(mate0Win, 'w')).toBe(100);
+    expect(evaluationToWinProbability(mate0Loss, 'w')).toBe(0);
+
+    // Normalization across perspectives
+    expect(normalizeToWhitePerspective(mate0Loss, 'b')).toEqual({ type: 'mate', value: 0 });
+    expect(normalizeToWhitePerspective(mate0Loss, 'w')).toEqual({ type: 'mate', value: -0 });
   });
 });

@@ -65,7 +65,7 @@ export const Chessboard: React.FC<ChessboardProps> = ({
   onSwipeRight,
 }) => {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
-  const [promotionPending, setPromotionPending] = useState<{ from: string; to: string } | null>(null);
+  const [promotionPending, setPromotionPending] = useState<{ from: string; to: string; color: PieceColor } | null>(null);
   const touchStartRef = React.useRef<{ x: number; y: number; time: number } | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -142,9 +142,10 @@ export const Chessboard: React.FC<ChessboardProps> = ({
     }
   }, [fen, selectedSquare]);
 
-  // Reset selected square when FEN changes
+  // Reset selected square and pending promotion when FEN changes
   useEffect(() => {
     setSelectedSquare(null);
+    setPromotionPending(null);
   }, [fen]);
 
   const handleSquareClick = (square: string) => {
@@ -163,8 +164,8 @@ export const Chessboard: React.FC<ChessboardProps> = ({
           fromPiece?.type === 'p' &&
           ((fromPiece.color === 'w' && square[1] === '8') || (fromPiece.color === 'b' && square[1] === '1'));
 
-        if (isPromotion) {
-          setPromotionPending({ from: selectedSquare, to: square });
+        if (isPromotion && fromPiece) {
+          setPromotionPending({ from: selectedSquare, to: square, color: fromPiece.color });
           return;
         }
 
@@ -212,10 +213,14 @@ export const Chessboard: React.FC<ChessboardProps> = ({
     const list: Array<{ from: string; to: string; color: string; opacity?: number; width?: number }> = [];
 
     // Engine best move (emerald glow)
+    // Only draw recommendation arrow if it corresponds to a valid piece for the current side to move
     if (bestMove && bestMove.length >= 4) {
       const from = bestMove.substring(0, 2);
       const to = bestMove.substring(2, 4);
-      list.push({ from, to, color: '#10b981', opacity: 0.9, width: 3.2 });
+      const piece = getPieceAt(from);
+      if (piece && piece.color === sideToMove) {
+        list.push({ from, to, color: '#10b981', opacity: 0.9, width: 3.2 });
+      }
     }
 
     // If played move was a blunder or mistake, show red/orange arrow
@@ -227,13 +232,13 @@ export const Chessboard: React.FC<ChessboardProps> = ({
     ) {
       const color = playedClassification === 'blunder' ? '#ef4444' : '#f97316';
       // Only show played move arrow if different from best move
-      if (bestMove && (lastMove.from !== bestMove.slice(0, 2) || lastMove.to !== bestMove.slice(2, 4))) {
+      if (!bestMove || lastMove.from !== bestMove.slice(0, 2) || lastMove.to !== bestMove.slice(2, 4)) {
         list.push({ from: lastMove.from, to: lastMove.to, color, opacity: 0.75, width: 2.8 });
       }
     }
 
     return list;
-  }, [showArrows, bestMove, lastMove, playedClassification]);
+  }, [showArrows, bestMove, lastMove, playedClassification, sideToMove, boardLayout]);
 
   // Files and ranks order based on orientation
   const files = orientation === 'w' ? ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] : ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'];
@@ -496,7 +501,7 @@ export const Chessboard: React.FC<ChessboardProps> = ({
                   }}
                 >
                   <div style={{ width: '44px', height: '44px' }}>
-                    <PieceSvg piece={promoPiece} color={sideToMove} />
+                    <PieceSvg piece={promoPiece} color={promotionPending.color} />
                   </div>
                 </button>
               );

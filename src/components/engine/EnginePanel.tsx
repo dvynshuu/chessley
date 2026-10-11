@@ -10,6 +10,7 @@ interface EnginePanelProps {
   interactiveInfo: EngineInfo | null;
   isEvaluating: boolean;
   currentMoveAnalysis?: MoveAnalysis | null;
+  nextMoveAnalysis?: MoveAnalysis | null;
   engineMode: EngineMode;
   onSetEngineMode: (mode: EngineMode) => void;
 }
@@ -19,15 +20,16 @@ export const EnginePanel: React.FC<EnginePanelProps> = ({
   interactiveInfo,
   isEvaluating,
   currentMoveAnalysis,
+  nextMoveAnalysis,
   engineMode,
   onSetEngineMode,
 }) => {
-  const depth = interactiveInfo?.depth || interactiveResult?.depth || currentMoveAnalysis?.depth || 0;
-  const nodes = interactiveInfo?.nodes || interactiveResult?.nodes || currentMoveAnalysis?.nodes || 0;
+  const depth = interactiveInfo?.depth || interactiveResult?.depth || nextMoveAnalysis?.depth || currentMoveAnalysis?.depth || 0;
+  const nodes = interactiveInfo?.nodes || interactiveResult?.nodes || nextMoveAnalysis?.nodes || currentMoveAnalysis?.nodes || 0;
   const nps = interactiveInfo?.nps || interactiveResult?.nps || 0;
-  const pv = interactiveInfo?.pv || interactiveResult?.principalVariation || currentMoveAnalysis?.principalVariation || [];
-  const score = interactiveResult?.normalizedScore || currentMoveAnalysis?.playedScoreAfter || { type: 'cp', value: 0 };
-  const bestMove = interactiveResult?.bestMove || currentMoveAnalysis?.bestMove || (pv.length > 0 ? pv[0] : null);
+  const pv = interactiveInfo?.pv || interactiveResult?.principalVariation || nextMoveAnalysis?.principalVariation || [];
+  const score = interactiveResult?.normalizedScore || currentMoveAnalysis?.playedScoreAfter || nextMoveAnalysis?.bestScoreBefore || { type: 'cp', value: 0 };
+  const bestMove = interactiveResult?.bestMove || nextMoveAnalysis?.bestMove || (pv.length > 0 ? pv[0] : null);
 
   const formatNodes = (val: number) => {
     if (val >= 1_000_000) return `${(val / 1_000_000).toFixed(1)}M`;

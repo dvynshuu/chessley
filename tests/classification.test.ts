@@ -100,4 +100,19 @@ describe('Classification', () => {
     );
     expect(missedWin).toBe('missed_win');
   });
+
+  it('classifies book move when isBookMove is true', () => {
+    const book = classifyMove(
+      dummyMove,
+      'e2e4',
+      'e2e4',
+      50,
+      50,
+      0,
+      DEFAULT_CLASSIFICATION_CONFIG,
+      undefined,
+      true
+    );
+    expect(book).toBe('book');
+  });
 });

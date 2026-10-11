@@ -21,13 +21,23 @@ export const MoveList: React.FC<MoveListProps> = ({
 
   // Group moves into pairs: [Move 1 White, Move 1 Black], [Move 2 White, Move 2 Black], etc.
   const movePairs: { moveNumber: number; white?: { san: string; ply: number }; black?: { san: string; ply: number } }[] = [];
-  for (let i = 0; i < game.moves.length; i += 2) {
-    const moveNumber = Math.floor(i / 2) + 1;
-    movePairs.push({
-      moveNumber,
-      white: { san: game.moves[i].san, ply: i + 1 },
-      black: game.moves[i + 1] ? { san: game.moves[i + 1].san, ply: i + 2 } : undefined,
-    });
+  let currentPair: { moveNumber: number; white?: { san: string; ply: number }; black?: { san: string; ply: number } } | null = null;
+
+  for (const m of game.moves) {
+    if (!currentPair || currentPair.moveNumber !== m.moveNumber) {
+      if (currentPair) {
+        movePairs.push(currentPair);
+      }
+      currentPair = { moveNumber: m.moveNumber };
+    }
+    if (m.color === 'w') {
+      currentPair.white = { san: m.san, ply: m.ply };
+    } else {
+      currentPair.black = { san: m.san, ply: m.ply };
+    }
+  }
+  if (currentPair) {
+    movePairs.push(currentPair);
   }
 
   // Smooth scroll container to keep current move in view

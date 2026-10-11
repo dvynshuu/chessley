@@ -44,6 +44,22 @@ describe('UciParser', () => {
     expect(parsed).toEqual({ bestMove: 'e7e8q', ponder: undefined });
   });
 
+  it('parses terminal depth 0 mate score info line', () => {
+    const line = 'info depth 0 score mate 0';
+    const info = UciParser.parseInfoLine(line);
+    expect(info).not.toBeNull();
+    expect(info?.depth).toBe(0);
+    expect(info?.score?.type).toBe('mate');
+    // Side to move is mated (-0)
+    expect(Object.is(info?.score?.value, -0)).toBe(true);
+  });
+
+  it('parses bestmove (none) as terminal move', () => {
+    const line = 'bestmove (none)';
+    const parsed = UciParser.parseBestMoveLine(line);
+    expect(parsed).toEqual({ bestMove: '', ponder: undefined });
+  });
+
   it('returns null for non-info lines', () => {
     expect(UciParser.parseInfoLine('uciok')).toBeNull();
     expect(UciParser.parseInfoLine('readyok')).toBeNull();

@@ -17,8 +17,37 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [hoverPly, setHoverPly] = useState<number | null>(null);
+  const [dimensions, setDimensions] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
 
   const totalPlies = game.moves.length;
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const updateDimensions = () => {
+      const rect = canvas.getBoundingClientRect();
+      setDimensions((prev) => {
+        if (prev.width === rect.width && prev.height === rect.height) return prev;
+        return { width: rect.width, height: rect.height };
+      });
+    };
+
+    updateDimensions();
+
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(() => updateDimensions());
+      ro.observe(canvas);
+    }
+
+    window.addEventListener('resize', updateDimensions);
+
+    return () => {
+      if (ro) ro.disconnect();
+      window.removeEventListener('resize', updateDimensions);
+    };
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -29,12 +58,14 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
 
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
+    const width = rect.width || dimensions.width;
+    const height = rect.height || dimensions.height;
 
-    const width = rect.width;
-    const height = rect.height;
+    if (width <= 0 || height <= 0) return;
+
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
 
     ctx.clearRect(0, 0, width, height);
 
@@ -81,9 +112,13 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
     }
 
     // Helper to draw smooth bezier curve across points
-    const drawSmoothPath = (pts: Array<{ x: number; y: number }>) => {
+    const drawSmoothPath = (pts: Array<{ x: number; y: number }>, startWithLineTo = false) => {
       if (pts.length < 2) return;
-      ctx.moveTo(pts[0].x, pts[0].y);
+      if (startWithLineTo) {
+        ctx.lineTo(pts[0].x, pts[0].y);
+      } else {
+        ctx.moveTo(pts[0].x, pts[0].y);
+      }
       for (let i = 0; i < pts.length - 1; i++) {
         const p0 = i > 0 ? pts[i - 1] : pts[i];
         const p1 = pts[i];
@@ -110,9 +145,13 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
     ctx.setLineDash([]);
 
     // 2. Draw Area fill for White (above midY)
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, width, midY);
+    ctx.clip();
     ctx.beginPath();
     ctx.moveTo(points[0].x, midY);
-    drawSmoothPath(points.map((p) => ({ x: p.x, y: Math.min(midY, p.y) })));
+    drawSmoothPath(points, true);
     ctx.lineTo(points[points.length - 1].x, midY);
     ctx.closePath();
     const whiteGrad = ctx.createLinearGradient(0, 0, 0, midY);
@@ -120,11 +159,16 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
     whiteGrad.addColorStop(1, 'rgba(248, 250, 252, 0.02)');
     ctx.fillStyle = whiteGrad;
     ctx.fill();
+    ctx.restore();
 
     // 3. Draw Area fill for Black (below midY)
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, midY, width, height - midY);
+    ctx.clip();
     ctx.beginPath();
     ctx.moveTo(points[0].x, midY);
-    drawSmoothPath(points.map((p) => ({ x: p.x, y: Math.max(midY, p.y) })));
+    drawSmoothPath(points, true);
     ctx.lineTo(points[points.length - 1].x, midY);
     ctx.closePath();
     const blackGrad = ctx.createLinearGradient(0, midY, 0, height);
@@ -132,10 +176,11 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
     blackGrad.addColorStop(1, 'rgba(0, 0, 0, 0.35)');
     ctx.fillStyle = blackGrad;
     ctx.fill();
+    ctx.restore();
 
     // 4. Draw Main Evaluation Spline Curve (Crisp Architectural Precision)
     ctx.beginPath();
-    drawSmoothPath(points);
+    drawSmoothPath(points, false);
     ctx.strokeStyle = '#c8aa6e';
     ctx.lineWidth = 1.8;
     ctx.stroke();
@@ -184,7 +229,7 @@ export const EvaluationChart: React.FC<EvaluationChartProps> = ({
       ctx.fill();
       ctx.restore();
     }
-  }, [game, analyses, currentPly, totalPlies]);
+  }, [game, analyses, currentPly, totalPlies, dimensions]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
